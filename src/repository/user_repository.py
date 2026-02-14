@@ -1,9 +1,7 @@
 fake_db = {
-
     "misha":{
         "password": "123"
     }
-
 }
 
 class UserRepository:

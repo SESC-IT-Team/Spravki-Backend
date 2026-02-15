@@ -1,11 +1,10 @@
-from http.client import responses
 from fastapi import Request
 
 from src.schemas.user_schemas import LoginSchema
 from src.repository.user_repository import UserRepository, get_user_repository
 from fastapi import HTTPException
 from fastapi.params import Depends
-from src.services.auth_service import AuthService
+from src.services.auth_service import AuthService, get_auth_service
 
 
 class UserService:
@@ -21,12 +20,12 @@ class UserService:
         if not user or user["password"] != data.password:
             raise HTTPException(status_code=401, detail="Wrong login or password")
 
-        return self.auth.create_token(data.username)
+        return self.auth.create_token(user.get("full_name"), user.get("class"))
 
     def get_info(self, request: Request):
-        info = self.auth.check_token(request)
+        info = self.auth.token_info(request)
         return info
 
 
-def get_user_service(repository: UserRepository = Depends(get_user_repository)) -> UserService:
-    return UserService(repository=repository)
+def get_user_service(repository: UserRepository = Depends(get_user_repository), auth: AuthService = Depends(get_auth_service)) -> UserService:
+    return UserService(repository=repository, auth=auth)

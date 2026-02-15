@@ -1,17 +1,19 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from fastapi import Request
 from jose import jwt
 from fastapi.responses import RedirectResponse
+from src.config import ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY
 
-SECRET_KEY = "supersecret"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 class AuthService:
 
-    def create_token(self, username: str):
-        expire = datetime.now() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        payload = {"sub": username, "exp": expire}
+    def create_token(self, full_name: str, clas: str):
+        expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        payload = {
+            "full_name": full_name,
+            "clas": clas,
+            "exp": expire
+        }
 
         token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
@@ -25,16 +27,20 @@ class AuthService:
         return response
 
 
-    def check_token(self, request: Request):
+    def token_info(self, request: Request):
         token = request.cookies.get("access_token")
 
         if not token:
             return RedirectResponse(url="/login", status_code=302)
 
+
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-            return payload.get("sub")
+            return payload.get("full_name"), payload.get("clas")
 
         except:
             return RedirectResponse(url="/login", status_code=302)
 
+
+def get_auth_service() -> AuthService:
+    return AuthService()

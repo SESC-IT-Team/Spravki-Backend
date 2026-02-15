@@ -1,6 +1,8 @@
 fake_db = {
-    "misha":{
-        "password": "123"
+    "user":{
+        "password": "1",
+        "full_name": "user_user",
+        "class": "XX"
     }
 }
 

@@ -1,5 +1,5 @@
 from fastapi import Request
-
+from src.services.auth_service import AuthService, get_auth_service
 from fastapi import APIRouter
 from fastapi.params import Depends
 from src.schemas.user_schemas import LoginSchema
@@ -10,10 +10,16 @@ router = APIRouter()
 async def login(data: LoginSchema, service: UserService = Depends(get_user_service)):
     return service.login(data)
 
-@router.get("/")
-async def get_references():
+@router.get("/login")
+async def login_screen():
     pass
 
+@router.get("/")
+async def get_references(request: Request, service: AuthService = Depends(get_auth_service)):
+    return service.token_info(request)
+
+
+#Сервис отрисовки
 @router.post("/reference_1")
 async def generate_ref_1(request: Request, service: UserService = Depends(get_user_service)):
     info = service.get_info(request)

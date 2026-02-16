@@ -2,8 +2,8 @@ from fastapi import Request
 from src.services.auth_service import AuthService, get_auth_service
 from fastapi import APIRouter
 from fastapi.params import Depends
-from src.schemas.user_schemas import LoginSchema
-from src.services.user_services import UserService, get_user_service
+from src.schemas.user_schema import LoginSchema
+from src.services.user_service import UserService, get_user_service
 router = APIRouter()
 
 @router.post("/login")

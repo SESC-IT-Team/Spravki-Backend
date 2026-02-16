@@ -1,6 +1,6 @@
 from fastapi import Request
 
-from src.schemas.user_schemas import LoginSchema
+from src.schemas.user_schema import LoginSchema
 from src.repository.user_repository import UserRepository, get_user_repository
 from fastapi import HTTPException
 from fastapi.params import Depends

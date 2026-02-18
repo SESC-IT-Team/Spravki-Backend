@@ -36,7 +36,10 @@ class AuthService:
 
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-            return payload.get("full_name"), payload.get("clas")
+            return {
+                "full_name": payload.get("full_name"),
+                "class": payload.get("clas")
+            }
 
         except:
             return RedirectResponse(url="/login", status_code=302)

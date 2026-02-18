@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from src.routers.user_routers import router as user_router
+from src.routers.user_routes import router as user_router
 import uvicorn
 
 

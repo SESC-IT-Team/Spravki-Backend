@@ -1,31 +1,30 @@
 from fastapi import Request
-
-from src.schemas.user_schema import LoginSchema
 from src.repository.user_repository import UserRepository, get_user_repository
-from fastapi import HTTPException
+from src.schemas.user_schema import UserSchema
 from fastapi.params import Depends
-from src.services.auth_service import AuthService, get_auth_service
+
 
 
 class UserService:
 
-    def __init__(self, repository: UserRepository, auth: AuthService):
+    def __init__(self, repository: UserRepository):
         self.repository = repository
-        self.auth = auth
+
+    def get_current_user(self, ) -> UserSchema:
+        return UserSchema({
+            "id": "c1e8cd06-6748-4a56-9002-403c4c729a58",
+            "last_name": "Пупкин",
+            "first_name": "Ваня",
+            "middle_name": "Петрович",
+            "role": "student",
+            "gender": "male",
+            "class_name": "8Е",
+            "graduation_year": "2029",
+            "login": "admin",
+            "created_at": "2026-02-17T06:17:27.599959Z",
+            "updated_at": "2026-02-17T06:17:27.599961Z"
+        })
 
 
-    def login(self, data: LoginSchema):
-        user = self.repository.get_user(data.username)
-
-        if not user or user["password"] != data.password:
-            raise HTTPException(status_code=401, detail="Wrong login or password")
-
-        return self.auth.create_token(user.get("full_name"), user.get("class"))
-
-    def get_info(self, request: Request):
-        info = self.auth.token_info(request)
-        return info
-
-
-def get_user_service(repository: UserRepository = Depends(get_user_repository), auth: AuthService = Depends(get_auth_service)) -> UserService:
-    return UserService(repository=repository, auth=auth)
+def get_user_service(repository: UserRepository = Depends(get_user_repository)) -> UserService:
+    return UserService(repository=repository)

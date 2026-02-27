@@ -13,5 +13,5 @@ dependencies = [
     "uvicorn>=0.40.0",
     "weasyprint>=68.1",
     "aio_pika",
-    "pydantic_settings"
+    "pydantic-settings",
 ]

@@ -1,12 +1,13 @@
 import asyncio
 import logging
-
+import json
 import aio_pika
-
+from aio_pika import ExchangeType
 from src.config import Settings
 from src.rabbitmq.tasks.HeadersSchema import HeadersSchema, CertificateTypes
 from src.rabbitmq.tasks.impl.SocialFoundationCertificate import SocialFoundationCertificate
 from src.rabbitmq.tasks.impl.SocialFoundationCertificateSchema import SocialFoundationCertificateSchema
+from src.config import settings
 
 # Настройка логгера
 logging.basicConfig(
@@ -21,25 +22,28 @@ async def main():
 
     try:
         connection = await aio_pika.connect_robust(
-            host=Settings.RABBITMQ_HOST,
-            port=int(Settings.RABBITMQ_PORT),
-            ssl=Settings.RABBITMQ_SSL,
-            login=Settings.RABBITMQ_USER,
-            password=Settings.RABBITMQ_PASSWORD,
+            host=settings.RABBITMQ_HOST,
+            port=int(settings.RABBITMQ_PORT),
+            ssl=settings.RABBITMQ_SSL,
+            login=settings.RABBITMQ_USER,
+            password=settings.RABBITMQ_PASSWORD,
         )
+
 
         channel = await connection.channel()
         queue = await channel.declare_queue("render_tasks", durable=True)
+
 
         async def on_message(message):
             logger.info(f"Получено сообщение: {message.body.decode()}")
             logger.info(f"{type(message)}")
 
-            headers = HeadersSchema.model_validate(message.headers)
-
-            if headers.certificate_type == CertificateTypes.SocialFoundation:
-                body = SocialFoundationCertificateSchema.model_validate(message.body.decode())
-                SocialFoundationCertificate.render(body)
+            raw_type = message.headers.get("certificate_type")
+            certificate_type = CertificateTypes(raw_type)
+            if certificate_type == CertificateTypes.SocialFoundation:
+                body = SocialFoundationCertificateSchema.model_validate(json.loads(message.body.decode()))
+                print("ok")
+                # SocialFoundationCertificate.render(body)
 
             await message.ack()
 

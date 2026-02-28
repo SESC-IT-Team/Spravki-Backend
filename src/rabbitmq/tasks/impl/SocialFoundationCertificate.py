@@ -10,9 +10,9 @@ from src.rabbitmq.tasks.impl.SocialFoundationCertificateSchema import SocialFoun
 class SocialFoundationCertificate(AbstractCertificate):
     @staticmethod
     def render(data: SocialFoundationCertificateSchema):
-        env = Environment(loader=FileSystemLoader('templates'))
+        env = Environment(loader=FileSystemLoader('src/rabbitmq/tasks/impl/templates'))
         template = env.get_template('SocialFoundationCertificate.html') 
-        data['logo_path'] = 'logo.png' 
+        # data['logo_path'] = 'logo.png'
 
         html_content = template.render(**data.model_dump())
 

@@ -1,13 +1,32 @@
 FROM python:3.12-alpine
 
+# Install system dependencies required for libgobject, Pango, and Cairo
+# Added: pango, cairo, librsvg, fontconfig, ttf-dejavu
+RUN apk add --no-cache \
+    gobject-introspection \
+    py3-gobject3 \
+    libffi \
+    pango \
+    cairo \
+    librsvg \
+    fontconfig \
+    ttf-dejavu
+
 WORKDIR /app
 
 RUN pip install --no-cache-dir uv
+
 COPY pyproject.toml README.md ./
+
+# Exclude PyGObject/cairo from pip if installed via apk to avoid conflicts
+# If your pyproject.toml includes them, you may need to adjust uv sync args
 RUN uv sync --no-dev
 
 COPY . .
 
 ENV PYTHONPATH=/app
+# Ensure the dynamic linker can find the libraries (usually not needed with apk, but safe for Alpine)
+ENV LD_LIBRARY_PATH=/usr/lib
+
 EXPOSE 8000
 CMD ["uv", "run", "python", "-m", "src.rabbitmq.consumer"]

@@ -43,7 +43,7 @@ async def main():
             if certificate_type == CertificateTypes.SocialFoundation:
                 body = SocialFoundationCertificateSchema.model_validate(json.loads(message.body.decode()))
                 print("ok")
-                # SocialFoundationCertificate.render(body)
+                SocialFoundationCertificate.render(body)
 
             await message.ack()
 

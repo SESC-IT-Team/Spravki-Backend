@@ -1,11 +1,11 @@
-from pyexpat.errors import messages
-
+from src.models.order_model import CertificateOrder
 from src.rabbitmq.publisher import CertificateRabbitmqPublisher
-from src.rabbitmq.tasks.CertificateSchema import AbstractCertificateSchema
-from src.rabbitmq.tasks.HeadersSchema import HeadersSchema
-from src.rabbitmq.tasks.impl.SocialFoundationCertificate import SocialFoundationCertificate
+from src.rabbitmq.tasks.HeadersSchema import HeadersSchema, CertificateTypes
 from src.rabbitmq.tasks.impl.SocialFoundationCertificateSchema import SocialFoundationCertificateSchema
-from src.schemas.order_shema import CertificateRequest
+from src.repository.database_repository import database_repository
+from sqlalchemy.ext.asyncio import AsyncSession
+from src.db.database import async_session
+from sqlalchemy import select
 
 
 class OrderService:
@@ -33,5 +33,26 @@ class OrderService:
 
         await obj.send_order_messages(messages=[SocialFoundationCertificateSchema.model_validate(message)], certificate_type=headers.certificate_type)
 
+    async def create_order(self, certificate_type: CertificateTypes, full_name: str):
+        async with async_session() as session:  # создаём сессию здесь
+            await database_repository().create_order(
+                session=session,
+                full_name=full_name,
+                certificate_type=certificate_type
+            )
+            await session.commit()  # коммитим здесь
+
+    async def get_orders(self, session: AsyncSession):
+        return await database_repository().get_orders(session=session)
+
+
+    async def create_document(self, session: AsyncSession):
+        orders = await database_repository().get_false_orders(session=session)
+        for order in orders:
+            # функция генерации документа
+            order.is_created = True
+        await session.commit()
+
+
 def get_order_service():
-    return OrderService
+    return OrderService()

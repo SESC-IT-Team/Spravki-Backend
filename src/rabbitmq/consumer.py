@@ -8,6 +8,7 @@ from src.rabbitmq.tasks.HeadersSchema import HeadersSchema, CertificateTypes
 from src.rabbitmq.tasks.impl.SocialFoundationCertificate import SocialFoundationCertificate
 from src.rabbitmq.tasks.impl.SocialFoundationCertificateSchema import SocialFoundationCertificateSchema
 from src.config import settings
+from src.services.order_service import OrderService
 
 # Настройка логгера
 logging.basicConfig(
@@ -42,7 +43,7 @@ async def main():
             certificate_type = CertificateTypes(raw_type)
             if certificate_type == CertificateTypes.SocialFoundation:
                 body = SocialFoundationCertificateSchema.model_validate(json.loads(message.body.decode()))
-                print("ok")
+                await OrderService().create_order(certificate_type=certificate_type, full_name=body.fio)
                 SocialFoundationCertificate.render(body)
 
             await message.ack()

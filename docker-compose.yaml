@@ -24,11 +24,14 @@ services:
       - "8000:8000"
     env_file:
       - .env
+    volumes:
+      - ./alembic:/app/alembic
     depends_on:
       rabbitmq:
         condition: service_healthy
       postgres:
         condition: service_started
+    command: sh entrypoint.sh
     restart: unless-stopped
 
   worker:

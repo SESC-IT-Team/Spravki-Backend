@@ -16,4 +16,5 @@ dependencies = [
     "pydantic-settings",
     "sqlalchemy>=2.0.47",
     "asyncpg>=0.31.0",
+    "alembic>=1.18.4",
 ]

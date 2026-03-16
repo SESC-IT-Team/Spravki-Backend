@@ -7,6 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.db.database import async_session
 from sqlalchemy import select
 
+from src.schemas.filter_shema import FilterRequest
+
 
 class OrderService:
     async def create_certificate(self, headers: HeadersSchema):
@@ -42,8 +44,8 @@ class OrderService:
             )
             await session.commit()  # коммитим здесь
 
-    async def get_orders(self, session: AsyncSession):
-        return await database_repository().get_orders(session=session)
+    async def get_orders(self, session: AsyncSession, data: FilterRequest):
+        return await database_repository().get_orders(session=session, data=data)
 
 
     async def create_document(self, session: AsyncSession):
@@ -52,6 +54,9 @@ class OrderService:
             # функция генерации документа
             order.is_created = True
         await session.commit()
+
+    async def get_my_orders(self, session: AsyncSession):
+        return await database_repository().get_my_orders(session=session, full_name="Пушкинов Александр Сергеевич")
 
 
 def get_order_service():

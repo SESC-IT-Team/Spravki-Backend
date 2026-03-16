@@ -2,6 +2,7 @@ from fastapi import Request
 from src.repository.user_repository import UserRepository, get_user_repository
 from src.schemas.user_schema import UserSchema
 from fastapi.params import Depends
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 
@@ -27,6 +28,9 @@ class UserService:
 
     def check_admin(self):
         ...
+
+
+
 
 
 def get_user_service(repository: UserRepository = Depends(get_user_repository)) -> UserService:

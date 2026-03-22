@@ -46,7 +46,8 @@ class RabbitConnection:
         self,
         messages: List[AbstractCertificateSchema],
         routing_key: str,
-        headers: HeadersSchema
+        headers: HeadersSchema,
+        department: str,
     ) -> None:
         """Отправка сообщений без транзакций и повторных попыток."""
         if not self._connection or self._connection.is_closed:
@@ -65,7 +66,7 @@ class RabbitConnection:
                     body=body,
                     message_id=str(uuid.uuid4()),
                     delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
-                    headers={"certificate_type": headers.certificate_type.value}
+                    headers={"certificate_type": headers.certificate_type.value, "department": department}
 
                 ),
                 routing_key=routing_key
@@ -76,6 +77,7 @@ class CertificateRabbitmqPublisher(RabbitConnection):
     async def send_order_messages(
             self,
             messages: List[AbstractCertificateSchema],
-            certificate_type: CertificateTypes
+            certificate_type: CertificateTypes,
+            department: str,
     ) -> None:
-        await super().send_messages(messages, 'render_tasks', HeadersSchema(certificate_type=certificate_type))
+        await super().send_messages(messages=messages, routing_key='render_tasks', headers=HeadersSchema(certificate_type=certificate_type), department=department)

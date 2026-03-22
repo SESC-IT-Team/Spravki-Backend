@@ -41,9 +41,10 @@ async def main():
 
             raw_type = message.headers.get("certificate_type")
             certificate_type = CertificateTypes(raw_type)
+            department = message.headers.get("department")
             if certificate_type == CertificateTypes.SocialFoundation:
                 body = SocialFoundationCertificateSchema.model_validate(json.loads(message.body.decode()))
-                await OrderService().create_order(certificate_type=certificate_type, full_name=body.fio)
+                await OrderService().create_order(certificate_type=certificate_type, full_name=body.fio, department=department)
                 SocialFoundationCertificate.render(body)
 
             await message.ack()

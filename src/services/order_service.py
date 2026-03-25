@@ -7,12 +7,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.db.database import async_session
 from sqlalchemy import select
 
+from src.schemas.department_shema import DepartmentRequest, DepartmentShema
 from src.schemas.filter_shema import FilterRequest
 
 
 class OrderService:
-    async def create_certificate(self, headers: HeadersSchema, data: dict, department: str):
-    #     Сервис отрисовки
+    async def create_certificate(self, headers: HeadersSchema, data: dict):
+
+        department = await self.get_department(headers=headers)
+    # #     Сервис отрисовки
     #     message = {
     #     "fio": "Пушкинов Александр Сергеевич",
     #     "birth_date": "06.06.1799",
@@ -33,7 +36,7 @@ class OrderService:
         obj = CertificateRabbitmqPublisher()
 
 
-        await obj.send_order_messages(messages=[SocialFoundationCertificateSchema.model_validate(data)], certificate_type=headers.certificate_type, department=department)
+        await obj.send_order_messages(messages=[SocialFoundationCertificateSchema.model_validate(data)], certificate_type=headers.certificate_type, department=DepartmentShema(department))
 
     async def create_order(self, certificate_type: CertificateTypes, full_name: str, department: str):
         async with async_session() as session:  # создаём сессию здесь
@@ -46,7 +49,7 @@ class OrderService:
             )
             await session.commit()  # коммитим здесь
 
-    async def get_orders(self, session: AsyncSession, data: FilterRequest, department: str):
+    async def get_orders(self, session: AsyncSession, data: FilterRequest, department: DepartmentRequest):
         return await database_repository().get_orders(session=session, data=data, department=department)
 
 
@@ -57,8 +60,22 @@ class OrderService:
             order.is_created = True
         await session.commit()
 
-    async def get_my_orders(self, session: AsyncSession, department: str):
+    async def get_my_orders(self, session: AsyncSession, department: DepartmentRequest):
         return await database_repository().get_my_orders(session=session, full_name="Пушкинов Александр Сергеевич", department=department)
+
+
+    async def get_department(self, headers: HeadersSchema):
+        certificate_type = headers.certificate_type
+
+        if certificate_type == CertificateTypes.SocialFoundation or certificate_type == CertificateTypes.Standard or certificate_type == CertificateTypes.Tax or certificate_type == CertificateTypes.MilitaryRegistration:
+            return str("educational")
+
+        if certificate_type == CertificateTypes.Certificate or certificate_type == CertificateTypes.ExtraditionDocuments:
+            return str("CSD")
+
+        if certificate_type == CertificateTypes.Hostel:
+            return str("hostel")
+
 
 
 def get_order_service():

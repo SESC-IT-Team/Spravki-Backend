@@ -8,7 +8,10 @@ from src.rabbitmq.tasks.HeadersSchema import HeadersSchema, CertificateTypes
 from src.rabbitmq.tasks.impl.SocialFoundationCertificate import SocialFoundationCertificate
 from src.rabbitmq.tasks.impl.SocialFoundationCertificateSchema import SocialFoundationCertificateSchema
 from src.config import settings
+from src.schemas.department_shema import DepartmentShema
 from src.services.order_service import OrderService
+from typing import cast
+
 
 # Настройка логгера
 logging.basicConfig(
@@ -38,10 +41,11 @@ async def main():
         async def on_message(message):
             logger.info(f"Получено сообщение: {message.body.decode()}")
             logger.info(f"{type(message)}")
-
+            department: str
             raw_type = message.headers.get("certificate_type")
             certificate_type = CertificateTypes(raw_type)
             department = message.headers.get("department")
+
             if certificate_type == CertificateTypes.SocialFoundation:
                 body = SocialFoundationCertificateSchema.model_validate(json.loads(message.body.decode()))
                 await OrderService().create_order(certificate_type=certificate_type, full_name=body.fio, department=department)

@@ -9,7 +9,7 @@ from aio_pika.abc import AbstractChannel, AbstractConnection, AbstractExchange
 from src.config import settings
 from src.rabbitmq.tasks.CertificateSchema import AbstractCertificateSchema
 from src.rabbitmq.tasks.HeadersSchema import HeadersSchema, CertificateTypes
-
+from src.schemas.department_shema import DepartmentShema, DepartmentRequest
 
 
 class RabbitConnection:
@@ -47,7 +47,7 @@ class RabbitConnection:
         messages: List[AbstractCertificateSchema],
         routing_key: str,
         headers: HeadersSchema,
-        department: str,
+        department: DepartmentShema,
     ) -> None:
         """Отправка сообщений без транзакций и повторных попыток."""
         if not self._connection or self._connection.is_closed:
@@ -66,7 +66,7 @@ class RabbitConnection:
                     body=body,
                     message_id=str(uuid.uuid4()),
                     delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
-                    headers={"certificate_type": headers.certificate_type.value, "department": department}
+                    headers={"certificate_type": headers.certificate_type.value, "department": department.value}
 
                 ),
                 routing_key=routing_key
@@ -78,6 +78,6 @@ class CertificateRabbitmqPublisher(RabbitConnection):
             self,
             messages: List[AbstractCertificateSchema],
             certificate_type: CertificateTypes,
-            department: str,
+            department: DepartmentShema,
     ) -> None:
         await super().send_messages(messages=messages, routing_key='render_tasks', headers=HeadersSchema(certificate_type=certificate_type), department=department)

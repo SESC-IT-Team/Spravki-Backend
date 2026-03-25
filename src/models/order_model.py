@@ -3,6 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from src.db.database import Base
 
 
+
 class CertificateOrder(Base):
     __tablename__ = "certificate_actions"
 

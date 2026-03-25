@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, delete
 from src.models.order_model import CertificateOrder
 from src.rabbitmq.tasks.HeadersSchema import CertificateTypes
+from src.schemas.department_shema import DepartmentRequest, DepartmentShema
 from src.schemas.filter_shema import FilterRequest, FilterShema
 
 
@@ -12,35 +13,38 @@ class database_repository:
 
 
 
-    async def get_orders(self, session: AsyncSession, data: FilterRequest, department: str):
+    async def get_orders(self, session: AsyncSession, data: FilterRequest, department: DepartmentRequest):
+        user_department = department.department.value
+
         if data.filter == FilterShema.date_asc:
-            result = await session.execute(select(CertificateOrder).where(CertificateOrder.department == department).order_by(CertificateOrder.created_at.asc()))
+            result = await session.execute(select(CertificateOrder).where(CertificateOrder.department == user_department).order_by(CertificateOrder.created_at.asc()))
             return result.scalars().all()
 
         if data.filter == FilterShema.date_desc:
-            result = await session.execute(select(CertificateOrder).where(CertificateOrder.department == department).order_by(CertificateOrder.created_at.desc()))
+            result = await session.execute(select(CertificateOrder).where(CertificateOrder.department == user_department).order_by(CertificateOrder.created_at.desc()))
             return result.scalars().all()
 
         if data.filter == FilterShema.status_true:
-            result = await session.execute(select(CertificateOrder).where(CertificateOrder.is_created == True and CertificateOrder.department == department))
+            result = await session.execute(select(CertificateOrder).where(CertificateOrder.is_created == True and CertificateOrder.department == user_department))
             return result.scalars().all()
 
         if data.filter == FilterShema.status_false:
-            result = await session.execute(select(CertificateOrder).where(CertificateOrder.is_created == False and CertificateOrder.department == department))
+            result = await session.execute(select(CertificateOrder).where(CertificateOrder.is_created == False and CertificateOrder.department == user_department))
             return result.scalars().all()
 
         if data.filter == FilterShema.none:
-            result = await session.execute(select(CertificateOrder).where(CertificateOrder.department == department))
+            result = await session.execute(select(CertificateOrder).where(CertificateOrder.department == user_department))
             return result.scalars().all()
 
 
         result = await session.execute(select(CertificateOrder))
         return result.scalars().all()
 
-    async def get_my_orders(self, session: AsyncSession, full_name, department: str):
+    async def get_my_orders(self, session: AsyncSession, full_name, department: DepartmentRequest):
+        c_department = department.department.value
         items = select(CertificateOrder).where(
             (CertificateOrder.full_name == full_name) &
-            (CertificateOrder.department == department)
+            (CertificateOrder.department == c_department)
         )
         result = await session.execute(items)
         orders = result.scalars().all()

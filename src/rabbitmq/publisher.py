@@ -5,6 +5,7 @@ from typing import List, Optional
 import aio_pika
 from aio_pika import ExchangeType
 from aio_pika.abc import AbstractChannel, AbstractConnection, AbstractExchange
+from sesc_auth_sdk.schemas.user import UserSchema
 
 from src.config import settings
 from src.rabbitmq.tasks.CertificateSchema import AbstractCertificateSchema
@@ -44,7 +45,7 @@ class RabbitConnection:
 
     async def send_messages(
         self,
-        messages: List[AbstractCertificateSchema],
+        messages: List[UserSchema],
         routing_key: str,
         headers: HeadersSchema,
         department: DepartmentShema,
@@ -59,7 +60,7 @@ class RabbitConnection:
         queue = await self._channel.declare_queue(name=routing_key, durable=True)
         await queue.bind(self._exchange, routing_key=routing_key)
         for msg in messages:
-            body = json.dumps(msg.model_dump()).encode()
+            body = msg.model_dump_json().encode()
 
             await self._exchange.publish(
                 aio_pika.Message(
@@ -76,7 +77,7 @@ class RabbitConnection:
 class CertificateRabbitmqPublisher(RabbitConnection):
     async def send_order_messages(
             self,
-            messages: List[AbstractCertificateSchema],
+            messages: List[UserSchema],
             certificate_type: CertificateTypes,
             department: DepartmentShema,
     ) -> None:

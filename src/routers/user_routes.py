@@ -8,26 +8,29 @@ from src.services.order_service import OrderService, get_order_service
 from src.db.database import get_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.schemas.filter_shema import FilterRequest
+from typing import Annotated
+from sesc_auth_sdk.schemas.user import UserSchema
+from sesc_auth_sdk.dependencies import LyceumAuth
+from sesc_auth_sdk.enums.role import Role
 router = APIRouter()
 
 
 
 @router.post("/create_order")
-async def create_order(headers: HeadersSchema, data: dict, order_service: OrderService = Depends(get_order_service)):
-    await order_service.create_certificate(headers=headers, data=data)
+async def create_order(user: Annotated[UserSchema, Depends(LyceumAuth())], headers: HeadersSchema, order_service: OrderService = Depends(get_order_service)):
+    await order_service.create_certificate(headers=headers, data=user)
 
 
 @router.post("/get_my_orders")
-async def get_my_orders(department: DepartmentRequest, session: AsyncSession = Depends(get_session), order_service: OrderService = Depends(get_order_service)):
-    return await order_service.get_my_orders(session, department=department)
+async def get_my_orders(user: Annotated[UserSchema, Depends(LyceumAuth())], department: DepartmentRequest, session: AsyncSession = Depends(get_session), order_service: OrderService = Depends(get_order_service)):
+    return await order_service.get_my_orders(session, department=department, user=user)
 
 @router.post("/get_orders")
-async def get_orders(data: FilterRequest, department: DepartmentRequest, session: AsyncSession = Depends(get_session), order_service: OrderService = Depends(get_order_service)):
+async def get_orders(user: Annotated[UserSchema, Depends(LyceumAuth([Role.admin]))], data: FilterRequest, department: DepartmentRequest, session: AsyncSession = Depends(get_session), order_service: OrderService = Depends(get_order_service)):
     return await order_service.get_orders(session, data=data, department=department)
 
-@router.get("/download")
-async def create_document(service: UserService = Depends(get_user_service), order_service: OrderService = Depends(get_order_service), session: AsyncSession = Depends(get_session)):
-    service.check_admin()
-    await order_service.create_document(session)
+@router.post("/download")
+async def create_document(user: Annotated[UserSchema, Depends(LyceumAuth([Role.admin]))], department: DepartmentRequest, service: UserService = Depends(get_user_service), order_service: OrderService = Depends(get_order_service), session: AsyncSession = Depends(get_session)):
+    await order_service.create_document(session, department=department)
 
 

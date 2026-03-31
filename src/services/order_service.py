@@ -1,3 +1,5 @@
+from sesc_auth_sdk.schemas.user import UserSchema
+
 from src.models.order_model import CertificateOrder
 from src.rabbitmq.publisher import CertificateRabbitmqPublisher
 from src.rabbitmq.tasks.HeadersSchema import HeadersSchema, CertificateTypes
@@ -12,7 +14,7 @@ from src.schemas.filter_shema import FilterRequest
 
 
 class OrderService:
-    async def create_certificate(self, headers: HeadersSchema, data: dict):
+    async def create_certificate(self, headers: HeadersSchema, data: UserSchema):
 
         department = await self.get_department(headers=headers)
     # #     Сервис отрисовки
@@ -36,7 +38,7 @@ class OrderService:
         obj = CertificateRabbitmqPublisher()
 
 
-        await obj.send_order_messages(messages=[SocialFoundationCertificateSchema.model_validate(data)], certificate_type=headers.certificate_type, department=DepartmentShema(department))
+        await obj.send_order_messages(messages=[data], certificate_type=headers.certificate_type, department=DepartmentShema(department))
 
     async def create_order(self, certificate_type: CertificateTypes, full_name: str, department: str):
         async with async_session() as session:  # создаём сессию здесь
@@ -53,15 +55,16 @@ class OrderService:
         return await database_repository().get_orders(session=session, data=data, department=department)
 
 
-    async def create_document(self, session: AsyncSession):
-        orders = await database_repository().get_false_orders(session=session)
+    async def create_document(self, session: AsyncSession, department: DepartmentRequest):
+        orders = await database_repository().get_false_orders(session=session, department=department)
         for order in orders:
             # функция генерации документа
             order.is_created = True
         await session.commit()
 
-    async def get_my_orders(self, session: AsyncSession, department: DepartmentRequest):
-        return await database_repository().get_my_orders(session=session, full_name="Пушкинов Александр Сергеевич", department=department)
+    async def get_my_orders(self, session: AsyncSession, department: DepartmentRequest, user: UserSchema):
+        full_name = user.first_name + " " + user.last_name
+        return await database_repository().get_my_orders(session=session, full_name=full_name, department=department)
 
 
     async def get_department(self, headers: HeadersSchema):

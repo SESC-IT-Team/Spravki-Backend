@@ -3,6 +3,8 @@ import logging
 import json
 import aio_pika
 from aio_pika import ExchangeType
+from sesc_auth_sdk.schemas.user import UserSchema
+
 from src.config import Settings
 from src.rabbitmq.tasks.HeadersSchema import HeadersSchema, CertificateTypes
 from src.rabbitmq.tasks.impl.SocialFoundationCertificate import SocialFoundationCertificate
@@ -45,11 +47,15 @@ async def main():
             raw_type = message.headers.get("certificate_type")
             certificate_type = CertificateTypes(raw_type)
             department = message.headers.get("department")
+            body = UserSchema.model_validate(json.loads(message.body.decode()))
 
-            if certificate_type == CertificateTypes.SocialFoundation:
-                body = SocialFoundationCertificateSchema.model_validate(json.loads(message.body.decode()))
-                await OrderService().create_order(certificate_type=certificate_type, full_name=body.fio, department=department)
-                SocialFoundationCertificate.render(body)
+            full_name = body.first_name + " " + body.last_name
+
+            await OrderService().create_order(certificate_type=certificate_type, full_name=full_name,
+                                              department=department)
+            # if certificate_type == CertificateTypes.SocialFoundation:
+            #
+            #     SocialFoundationCertificate.render(body)
 
             await message.ack()
 

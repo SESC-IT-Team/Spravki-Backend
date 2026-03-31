@@ -5,6 +5,7 @@ FROM python:3.12-alpine
 RUN apk add --no-cache \
     gobject-introspection \
     py3-gobject3 \
+    git \
     libffi \
     pango \
     cairo \
@@ -20,6 +21,9 @@ COPY pyproject.toml README.md ./
 
 # Exclude PyGObject/cairo from pip if installed via apk to avoid conflicts
 # If your pyproject.toml includes them, you may need to adjust uv sync args
+
+ENV UV_SYSTEM_PYTHON=1
+
 RUN uv sync --no-dev
 
 COPY . .

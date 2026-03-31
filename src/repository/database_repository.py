@@ -40,7 +40,7 @@ class database_repository:
         result = await session.execute(select(CertificateOrder))
         return result.scalars().all()
 
-    async def get_my_orders(self, session: AsyncSession, full_name, department: DepartmentRequest):
+    async def get_my_orders(self, session: AsyncSession, full_name: str, department: DepartmentRequest):
         c_department = department.department.value
         items = select(CertificateOrder).where(
             (CertificateOrder.full_name == full_name) &
@@ -50,8 +50,12 @@ class database_repository:
         orders = result.scalars().all()
         return orders
 
-    async def get_false_orders(self, session: AsyncSession):
-        items = select(CertificateOrder).where(CertificateOrder.is_created == False)
+    async def get_false_orders(self, session: AsyncSession, department: DepartmentRequest):
+        user_department = department.department.value
+        items = select(CertificateOrder).where(
+            (CertificateOrder.is_created == False) &
+            (CertificateOrder.department == user_department)
+        )
         result = await session.execute(items)
         orders = result.scalars().all()
         return orders

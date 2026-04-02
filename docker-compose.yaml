@@ -12,8 +12,6 @@ services:
     volumes:
       - ./alembic:/app/alembic
     depends_on:
-      rabbitmq:
-        condition: service_healthy
       postgres:
         condition: service_started
     command: sh entrypoint.sh

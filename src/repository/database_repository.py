@@ -1,46 +1,53 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update, delete
+from sqlalchemy import select
 from src.models.order_model import CertificateOrder
-from src.rabbitmq.tasks.HeadersSchema import CertificateTypes
+from src.schemas.HeadersSchema import CertificateTypes
 from src.schemas.department_shema import DepartmentRequest, DepartmentShema
 from src.schemas.filter_shema import FilterRequest, FilterShema
+from src.schemas.order_shema import OrderShema
 
 
 class database_repository:
-    async def create_order(self, session: AsyncSession, full_name: str, certificate_type: CertificateTypes, department: str):
-        order = CertificateOrder(full_name=full_name, department=department, certificate_type=certificate_type.value)
+    async def create_order(self, session: AsyncSession, full_name: str, certificate_type: CertificateTypes, department: DepartmentShema):
+        order = CertificateOrder(full_name=full_name, department=department.value, certificate_type=certificate_type.value)
         session.add(order)
 
 
 
-    async def get_orders(self, session: AsyncSession, data: FilterRequest, department: DepartmentRequest):
+
+    async def get_orders(self, session: AsyncSession, data: FilterRequest, department: DepartmentRequest) -> list[OrderShema]:
         user_department = department.department.value
 
         if data.filter == FilterShema.date_asc:
             result = await session.execute(select(CertificateOrder).where(CertificateOrder.department == user_department).order_by(CertificateOrder.created_at.asc()))
-            return result.scalars().all()
+            orders = result.scalars().all()
+            return [OrderShema.model_validate(order) for order in orders]
 
         if data.filter == FilterShema.date_desc:
             result = await session.execute(select(CertificateOrder).where(CertificateOrder.department == user_department).order_by(CertificateOrder.created_at.desc()))
-            return result.scalars().all()
+            orders = result.scalars().all()
+            return [OrderShema.model_validate(order) for order in orders]
 
         if data.filter == FilterShema.status_true:
             result = await session.execute(select(CertificateOrder).where(CertificateOrder.is_created == True and CertificateOrder.department == user_department))
-            return result.scalars().all()
+            orders = result.scalars().all()
+            return [OrderShema.model_validate(order) for order in orders]
 
         if data.filter == FilterShema.status_false:
             result = await session.execute(select(CertificateOrder).where(CertificateOrder.is_created == False and CertificateOrder.department == user_department))
-            return result.scalars().all()
+            orders = result.scalars().all()
+            return [OrderShema.model_validate(order) for order in orders]
 
         if data.filter == FilterShema.none:
             result = await session.execute(select(CertificateOrder).where(CertificateOrder.department == user_department))
-            return result.scalars().all()
+            orders = result.scalars().all()
+            return [OrderShema.model_validate(order) for order in orders]
 
 
         result = await session.execute(select(CertificateOrder))
         return result.scalars().all()
 
-    async def get_my_orders(self, session: AsyncSession, full_name: str, department: DepartmentRequest):
+    async def get_my_orders(self, session: AsyncSession, full_name: str, department: DepartmentRequest) -> list[OrderShema]:
         c_department = department.department.value
         items = select(CertificateOrder).where(
             (CertificateOrder.full_name == full_name) &
@@ -48,7 +55,7 @@ class database_repository:
         )
         result = await session.execute(items)
         orders = result.scalars().all()
-        return orders
+        return [OrderShema.model_validate(order) for order in orders]
 
     async def get_false_orders(self, session: AsyncSession, department: DepartmentRequest):
         user_department = department.department.value

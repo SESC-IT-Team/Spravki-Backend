@@ -1,22 +1,23 @@
 from sesc_auth_sdk.schemas.user import UserSchema
-
-from src.models.order_model import CertificateOrder
-from src.rabbitmq.publisher import CertificateRabbitmqPublisher
-from src.rabbitmq.tasks.HeadersSchema import HeadersSchema, CertificateTypes
-from src.rabbitmq.tasks.impl.SocialFoundationCertificateSchema import SocialFoundationCertificateSchema
+from src.schemas.HeadersSchema import HeadersSchema, CertificateTypes
 from src.repository.database_repository import database_repository
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.db.database import async_session
-from sqlalchemy import select
 
 from src.schemas.department_shema import DepartmentRequest, DepartmentShema
 from src.schemas.filter_shema import FilterRequest
+from src.schemas.order_shema import OrderShema
 
 
 class OrderService:
+    def __init__(self):
+        self.repository = database_repository()
+
+
     async def create_certificate(self, headers: HeadersSchema, data: UserSchema):
 
         department = await self.get_department(headers=headers)
+        full_name = data.first_name + " " + data.last_name
     # #     Сервис отрисовки
     #     message = {
     #     "fio": "Пушкинов Александр Сергеевич",
@@ -35,14 +36,13 @@ class OrderService:
     #     ],
     #     "academic_director": "М. С. Рябченков"
     # }
-        obj = CertificateRabbitmqPublisher()
 
+        await OrderService().create_order(certificate_type=headers.certificate_type, full_name=full_name,
+                                          department=DepartmentShema(department))
 
-        await obj.send_order_messages(messages=[data], certificate_type=headers.certificate_type, department=DepartmentShema(department))
-
-    async def create_order(self, certificate_type: CertificateTypes, full_name: str, department: str):
+    async def create_order(self, certificate_type: CertificateTypes, full_name: str, department: DepartmentShema):
         async with async_session() as session:  # создаём сессию здесь
-            await database_repository().create_order(
+            await self.repository.create_order(
                 session=session,
                 full_name=full_name,
                 department=department,
@@ -51,20 +51,22 @@ class OrderService:
             )
             await session.commit()  # коммитим здесь
 
-    async def get_orders(self, session: AsyncSession, data: FilterRequest, department: DepartmentRequest):
-        return await database_repository().get_orders(session=session, data=data, department=department)
+    async def get_orders(self, session: AsyncSession, data: FilterRequest) -> list[OrderShema]:
+        department = DepartmentShema.educational
+        return await self.repository.get_orders(session=session, data=data, department=DepartmentRequest(department=department))
 
 
-    async def create_document(self, session: AsyncSession, department: DepartmentRequest):
-        orders = await database_repository().get_false_orders(session=session, department=department)
+    async def create_document(self, session: AsyncSession):
+        department = DepartmentShema.educational
+        orders = await self.repository.get_false_orders(session=session, department=DepartmentRequest(department=department))
         for order in orders:
             # функция генерации документа
             order.is_created = True
         await session.commit()
 
-    async def get_my_orders(self, session: AsyncSession, department: DepartmentRequest, user: UserSchema):
+    async def get_my_orders(self, session: AsyncSession, department: DepartmentRequest, user: UserSchema) -> list[OrderShema]:
         full_name = user.first_name + " " + user.last_name
-        return await database_repository().get_my_orders(session=session, full_name=full_name, department=department)
+        return await self.repository.get_my_orders(session=session, full_name=full_name, department=department)
 
 
     async def get_department(self, headers: HeadersSchema):
@@ -73,10 +75,10 @@ class OrderService:
         if certificate_type == CertificateTypes.SocialFoundation or certificate_type == CertificateTypes.Standard or certificate_type == CertificateTypes.Tax or certificate_type == CertificateTypes.MilitaryRegistration:
             return str("educational")
 
-        if certificate_type == CertificateTypes.Certificate or certificate_type == CertificateTypes.ExtraditionDocuments:
+        elif certificate_type == CertificateTypes.Certificate or certificate_type == CertificateTypes.ExtraditionDocuments:
             return str("CSD")
 
-        if certificate_type == CertificateTypes.Hostel:
+        elif certificate_type == CertificateTypes.Hostel:
             return str("hostel")
 
 

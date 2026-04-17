@@ -33,4 +33,3 @@ ENV PYTHONPATH=/app
 ENV LD_LIBRARY_PATH=/usr/lib
 
 EXPOSE 8000
-CMD ["uv", "run", "python", "-m", "src.rabbitmq.consumer"]

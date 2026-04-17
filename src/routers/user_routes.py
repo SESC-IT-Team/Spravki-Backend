@@ -1,7 +1,6 @@
-from fastapi import Request
 from fastapi import APIRouter
 from fastapi.params import Depends
-from src.rabbitmq.tasks.HeadersSchema import HeadersSchema
+from src.schemas.HeadersSchema import HeadersSchema
 from src.schemas.department_shema import DepartmentRequest
 from src.services.user_service import UserService, get_user_service
 from src.services.order_service import OrderService, get_order_service
@@ -17,20 +16,20 @@ router = APIRouter()
 
 
 @router.post("/create_order")
-async def create_order(user: Annotated[UserSchema, Depends(LyceumAuth())], headers: HeadersSchema, order_service: OrderService = Depends(get_order_service)):
+async def create_order(user: Annotated[UserSchema, Depends(LyceumAuth().return_user)], headers: HeadersSchema, order_service: OrderService = Depends(get_order_service)):
     await order_service.create_certificate(headers=headers, data=user)
 
 
 @router.post("/get_my_orders")
-async def get_my_orders(user: Annotated[UserSchema, Depends(LyceumAuth())], department: DepartmentRequest, session: AsyncSession = Depends(get_session), order_service: OrderService = Depends(get_order_service)):
+async def get_my_orders(user: Annotated[UserSchema, Depends(LyceumAuth().return_user)], department: DepartmentRequest, session: AsyncSession = Depends(get_session), order_service: OrderService = Depends(get_order_service)):
     return await order_service.get_my_orders(session, department=department, user=user)
 
 @router.post("/get_orders")
-async def get_orders(user: Annotated[UserSchema, Depends(LyceumAuth([Role.admin]))], data: FilterRequest, department: DepartmentRequest, session: AsyncSession = Depends(get_session), order_service: OrderService = Depends(get_order_service)):
-    return await order_service.get_orders(session, data=data, department=department)
+async def get_orders(data: FilterRequest, session: AsyncSession = Depends(get_session), order_service: OrderService = Depends(get_order_service)):
+    return await order_service.get_orders(session, data=data)
 
 @router.post("/download")
-async def create_document(user: Annotated[UserSchema, Depends(LyceumAuth([Role.admin]))], department: DepartmentRequest, service: UserService = Depends(get_user_service), order_service: OrderService = Depends(get_order_service), session: AsyncSession = Depends(get_session)):
-    await order_service.create_document(session, department=department)
+async def create_document(user: Annotated[UserSchema, Depends(LyceumAuth([Role.admin]))], service: UserService = Depends(get_user_service), order_service: OrderService = Depends(get_order_service), session: AsyncSession = Depends(get_session)):
+    await order_service.create_document(session)
 
 

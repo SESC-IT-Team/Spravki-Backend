@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from fastapi.params import Depends
 from src.schemas.HeadersSchema import HeadersSchema
 from src.schemas.department_shema import DepartmentRequest
+from src.schemas.order_shema import OrderShema
 from src.services.user_service import UserService, get_user_service
 from src.services.order_service import OrderService, get_order_service
 from src.db.database import get_session
@@ -21,11 +22,11 @@ async def create_order(user: Annotated[UserSchema, Depends(LyceumAuth().return_u
 
 
 @router.post("/get_my_orders")
-async def get_my_orders(user: Annotated[UserSchema, Depends(LyceumAuth().return_user)], department: DepartmentRequest, session: AsyncSession = Depends(get_session), order_service: OrderService = Depends(get_order_service)):
+async def get_my_orders(user: Annotated[UserSchema, Depends(LyceumAuth().return_user)], department: DepartmentRequest, session: AsyncSession = Depends(get_session), order_service: OrderService = Depends(get_order_service)) -> list[OrderShema]:
     return await order_service.get_my_orders(session, department=department, user=user)
 
 @router.post("/get_orders")
-async def get_orders(data: FilterRequest, session: AsyncSession = Depends(get_session), order_service: OrderService = Depends(get_order_service)):
+async def get_orders(data: FilterRequest, session: AsyncSession = Depends(get_session), order_service: OrderService = Depends(get_order_service)) -> list[OrderShema]:
     return await order_service.get_orders(session, data=data)
 
 @router.post("/download")

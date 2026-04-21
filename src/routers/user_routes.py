@@ -26,7 +26,7 @@ async def get_my_orders(user: Annotated[UserSchema, Depends(LyceumAuth().return_
     return await order_service.get_my_orders(session, department=department, user=user)
 
 @router.post("/get_orders")
-async def get_orders(data: FilterRequest, session: AsyncSession = Depends(get_session), order_service: OrderService = Depends(get_order_service)) -> list[OrderShema]:
+async def get_orders(user: Annotated[UserSchema, Depends(LyceumAuth([Role.admin]))], data: FilterRequest, session: AsyncSession = Depends(get_session), order_service: OrderService = Depends(get_order_service)) -> list[OrderShema]:
     return await order_service.get_orders(session, data=data)
 
 @router.post("/download")

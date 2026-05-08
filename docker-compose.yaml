@@ -1,12 +1,9 @@
 services:
-
   app:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: my_app
-    ports:
-      - "8081:8000"
     env_file:
       - .env
     volumes:
@@ -16,6 +13,22 @@ services:
         condition: service_started
     command: sh entrypoint.sh
     restart: unless-stopped
+    networks:
+      - app_network
+      - traefik-public
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-public
+      - traefik.http.routers.spravki-back.rule=Host(`sesc-it-team.ru`) && PathPrefix(`/spravki-back`)
+      - traefik.http.routers.spravki-back.entrypoints=web
+      - traefik.http.routers.spravki-back.middlewares=spravki-back-strip
+      - traefik.http.routers.spravki-back-secure.rule=Host(`sesc-it-team.ru`) && PathPrefix(`/spravki-back`)
+      - traefik.http.routers.spravki-back-secure.entrypoints=websecure
+      - traefik.http.routers.spravki-back-secure.tls=true
+      - traefik.http.routers.spravki-back-secure.tls.certresolver=letsencrypt
+      - traefik.http.routers.spravki-back-secure.middlewares=spravki-back-strip
+      - traefik.http.middlewares.spravki-back-strip.stripprefix.prefixes=/spravki-back
+      - traefik.http.services.spravki-back.loadbalancer.server.port=8000
 
   postgres:
     image: postgres:16
@@ -23,11 +36,18 @@ services:
       POSTGRES_USER: guest
       POSTGRES_PASSWORD: guest
       POSTGRES_DB: certificates
-    ports:
-      - "5430:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - app_network
 
 volumes:
-  rabbitmq_data:
   postgres_data:
+
+networks:
+  app_network:
+    driver: bridge
+  traefik-public:
+    external: true
+    name: traefik-public

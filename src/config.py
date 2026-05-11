@@ -10,4 +10,6 @@ class Settings(BaseSettings):
     DB_PASSWORD: str
     DB_NAME: str
 
+    ROOT_PATH: str = '/'
+
 settings = Settings()

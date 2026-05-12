@@ -3,7 +3,7 @@ name = "references"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = [
     "dotenv>=0.9.9",
     "fastapi>=0.129.0",
@@ -17,7 +17,7 @@ dependencies = [
     "sqlalchemy>=2.0.47",
     "asyncpg>=0.31.0",
     "alembic>=1.18.4",
-    "sesc-auth-sdk>=0.1.0",
+    "sesc-auth-sdk>=1.0.1",
 ]
 
 

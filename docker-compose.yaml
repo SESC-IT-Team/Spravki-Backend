@@ -11,7 +11,6 @@ services:
     depends_on:
       postgres:
         condition: service_started
-    command: sh entrypoint.sh
     restart: unless-stopped
     networks:
       - app_network
@@ -29,13 +28,21 @@ services:
       - traefik.http.routers.spravki-back-secure.middlewares=spravki-back-strip
       - traefik.http.middlewares.spravki-back-strip.stripprefix.prefixes=/spravki-back
       - traefik.http.services.spravki-back.loadbalancer.server.port=8000
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /app
+          ignore:
+            - .venv/
+            - .idea/
+        - action: rebuild
+          path: ./uv.lock
 
   postgres:
     image: postgres:16
-    environment:
-      POSTGRES_USER: guest
-      POSTGRES_PASSWORD: guest
-      POSTGRES_DB: certificates
+    env_file:
+      - .env
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped

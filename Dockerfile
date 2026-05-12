@@ -2,24 +2,26 @@ FROM python:3.12-alpine
 
 WORKDIR /app
 
-# Установка Poetry и UV
-RUN pip install --no-cache-dir poetry uv
+RUN apk add --no-cache bash git
 
-# Сначала копируем файлы pyproject.toml и README.md
-COPY pyproject.toml README.md ./
+RUN pip install --no-cache-dir uv
 
-# Выполняем uv sync (он должен видеть pyproject.toml)
+ENV UV_COMPILE_BYTECODE=1
+ENV UV_LINK_MODE=copy
+ENV UV_NO_DEV=1
+ENV UV_TOOL_BIN_DIR=/usr/local/bin
+
+COPY pyproject.toml ./
+
 RUN uv sync --no-dev
 
-# Копируем весь проект
 COPY . .
 
-# Скрипт entrypoint
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
-# Настройки окружения
-ENV PYTHONPATH=/app
+ENV PATH="/app/.venv/bin:$PATH"
+ENV PYTHONPATH="/app"
 EXPOSE 8000
 
-CMD ["uv", "run", "python", "-m", "src.main"]
+CMD ["bash", "./entrypoint.sh"]

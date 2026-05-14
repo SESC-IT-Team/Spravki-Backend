@@ -14,7 +14,7 @@ services:
     restart: unless-stopped
     networks:
       - app_network
-#      - traefik-public
+      - traefik-public
     labels:
       - traefik.enable=true
       - traefik.docker.network=traefik-public
@@ -55,6 +55,6 @@ volumes:
 networks:
   app_network:
     driver: bridge
-#  traefik-public:
-#    external: true
-#    name: traefik-public
+  traefik-public:
+    external: true
+    name: traefik-public

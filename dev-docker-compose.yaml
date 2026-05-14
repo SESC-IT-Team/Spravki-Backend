@@ -1,0 +1,45 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: my_app
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./alembic:/app/alembic
+    depends_on:
+      postgres:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - app_network
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /app
+          ignore:
+            - .venv/
+            - .idea/
+        - action: rebuild
+          path: ./uv.lock
+
+  postgres:
+    image: postgres:16
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - app_network
+
+volumes:
+  postgres_data:
+
+networks:
+  app_network:
+    driver: bridge

@@ -1,12 +1,6 @@
-from enum import Enum
-
 from pydantic import BaseModel
+from sesc_auth_sdk.enums.departments import Department
 
-
-class DepartmentShema(str, Enum):
-    educational = "educational"
-    CSD = "CSD"
-    hostel = "hostel"
 
 class DepartmentRequest(BaseModel):
-    department: DepartmentShema
+    department: Department

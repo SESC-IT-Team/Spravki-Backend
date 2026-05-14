@@ -57,22 +57,19 @@ class OrderService:
         return order
 
 
-    async def get_orders(self, session: AsyncSession, data: FilterRequest) -> list[OrderShema]:
+    async def get_orders(self, data: FilterRequest) -> list[OrderShema]:
         department = DepartmentShema.educational
-        return await self.repository.get_orders(session=session, data=data, department=DepartmentRequest(department=department))
+        return await self.repository.get_orders(data=data, department=DepartmentRequest(department=department))
 
 
-    async def create_document(self, session: AsyncSession):
+    async def create_document(self):
         department = DepartmentShema.educational
-        orders = await self.repository.get_false_orders(session=session, department=DepartmentRequest(department=department))
-        for order in orders:
-            # функция генерации документа
-            order.is_created = True
-        await session.commit()
+        orders = await self.repository.get_false_orders(department=DepartmentRequest(department=department))
 
-    async def get_my_orders(self, session: AsyncSession, department: DepartmentRequest, user: UserSchema) -> list[OrderShema]:
+
+    async def get_my_orders(self,department: DepartmentRequest, user: UserSchema) -> list[OrderShema]:
         full_name = user.first_name + " " + user.last_name
-        return await self.repository.get_my_orders(session=session, full_name=full_name, department=department)
+        return await self.repository.get_my_orders(full_name=full_name, department=department)
 
 
 

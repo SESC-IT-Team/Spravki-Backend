@@ -24,57 +24,59 @@ class DatabaseRepository:
 
 
 
-    async def get_orders(self, session: AsyncSession, data: FilterRequest, department: DepartmentRequest) -> list[OrderShema]:
+    async def get_orders(self, data: FilterRequest, department: DepartmentRequest) -> list[OrderShema]:
         user_department = department.department.value
 
         if data.filter == FilterShema.date_asc:
-            result = await session.execute(select(CertificateOrder).where(CertificateOrder.department == user_department).order_by(CertificateOrder.created_at.asc()))
+            result = await self.session.execute(select(CertificateOrder).where(CertificateOrder.department == user_department).order_by(CertificateOrder.created_at.asc()))
             orders = result.scalars().all()
             return [OrderShema.model_validate(order) for order in orders]
 
         if data.filter == FilterShema.date_desc:
-            result = await session.execute(select(CertificateOrder).where(CertificateOrder.department == user_department).order_by(CertificateOrder.created_at.desc()))
+            result = await self.session.execute(select(CertificateOrder).where(CertificateOrder.department == user_department).order_by(CertificateOrder.created_at.desc()))
             orders = result.scalars().all()
             return [OrderShema.model_validate(order) for order in orders]
 
         if data.filter == FilterShema.status_true:
-            result = await session.execute(select(CertificateOrder).where(CertificateOrder.is_created == True and CertificateOrder.department == user_department))
+            result = await self.session.execute(select(CertificateOrder).where(CertificateOrder.is_created == True and CertificateOrder.department == user_department))
             orders = result.scalars().all()
             return [OrderShema.model_validate(order) for order in orders]
 
         if data.filter == FilterShema.status_false:
-            result = await session.execute(select(CertificateOrder).where(CertificateOrder.is_created == False and CertificateOrder.department == user_department))
+            result = await self.session.execute(select(CertificateOrder).where(CertificateOrder.is_created == False and CertificateOrder.department == user_department))
             orders = result.scalars().all()
             return [OrderShema.model_validate(order) for order in orders]
 
         if data.filter == FilterShema.none:
-            result = await session.execute(select(CertificateOrder).where(CertificateOrder.department == user_department))
+            result = await self.session.execute(select(CertificateOrder).where(CertificateOrder.department == user_department))
             orders = result.scalars().all()
             return [OrderShema.model_validate(order) for order in orders]
 
 
-        result = await session.execute(select(CertificateOrder))
+        result = await self.session.execute(select(CertificateOrder))
         return result.scalars().all()
 
-    async def get_my_orders(self, session: AsyncSession, full_name: str, department: DepartmentRequest) -> list[OrderShema]:
+    async def get_my_orders(self, full_name: str, department: DepartmentRequest) -> list[OrderShema]:
         c_department = department.department.value
         items = select(CertificateOrder).where(
             (CertificateOrder.full_name == full_name) &
             (CertificateOrder.department == c_department)
         )
-        result = await session.execute(items)
+        result = await self.session.execute(items)
         orders = result.scalars().all()
         return [OrderShema.model_validate(order) for order in orders]
 
-    async def get_false_orders(self, session: AsyncSession, department: DepartmentRequest):
+    async def get_false_orders(self, department: DepartmentRequest):
         user_department = department.department.value
         items = select(CertificateOrder).where(
             (CertificateOrder.is_created == False) &
             (CertificateOrder.department == user_department)
         )
-        result = await session.execute(items)
+        result = await self.session.execute(items)
         orders = result.scalars().all()
-        return orders
+        for order in orders:
+            order.is_created = True
+        await self.session.commit()
 
     async def set_link(self, number: int, link: str):
         stmt = (

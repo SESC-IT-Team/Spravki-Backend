@@ -22,15 +22,15 @@ async def create_order(user: Annotated[UserSchema, Depends(LyceumAuth().return_u
 
 
 @router.post("/get_my_orders")
-async def get_my_orders(user: Annotated[UserSchema, Depends(LyceumAuth().return_user)], department: DepartmentRequest, session: AsyncSession = Depends(get_session), order_service: OrderService = Depends(get_order_service)) -> list[OrderShema]:
-    return await order_service.get_my_orders(session, department=department, user=user)
+async def get_my_orders(user: Annotated[UserSchema, Depends(LyceumAuth().return_user)], department: DepartmentRequest, order_service: OrderService = Depends(get_order_service)) -> list[OrderShema]:
+    return await order_service.get_my_orders(department=department, user=user)
 
 @router.post("/get_orders")
-async def get_orders(user: Annotated[UserSchema, Depends(LyceumAuth([Role.admin]))], data: FilterRequest, session: AsyncSession = Depends(get_session), order_service: OrderService = Depends(get_order_service)) -> list[OrderShema]:
-    return await order_service.get_orders(session, data=data)
+async def get_orders(user: Annotated[UserSchema, Depends(LyceumAuth([Role.admin]))], data: FilterRequest, order_service: OrderService = Depends(get_order_service)) -> list[OrderShema]:
+    return await order_service.get_orders(data=data)
 
 @router.post("/download")
-async def create_document(user: Annotated[UserSchema, Depends(LyceumAuth([Role.admin]))], service: UserService = Depends(get_user_service), order_service: OrderService = Depends(get_order_service), session: AsyncSession = Depends(get_session)):
-    await order_service.create_document(session)
+async def create_document(user: Annotated[UserSchema, Depends(LyceumAuth([Role.admin]))], service: UserService = Depends(get_user_service), order_service: OrderService = Depends(get_order_service)):
+    await order_service.create_document()
 
 

@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update
 
-from src.db.database import get_session
+from src.db.database import get_session, async_session
 from src.models.order_model import CertificateOrder
 from src.schemas.HeadersSchema import CertificateTypes
 from src.schemas.department_shema import DepartmentRequest
@@ -91,7 +91,7 @@ class DatabaseRepository:
 
 
 async def get_base_repository():
-    session = await get_session()
+    session = await async_session()
     return DatabaseRepository(session=session)
 
 

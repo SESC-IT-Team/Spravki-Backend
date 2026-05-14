@@ -6,7 +6,7 @@ from datetime import datetime
 
 from src.models.order_model import CertificateOrder
 from src.schemas.HeadersSchema import HeadersSchema, CertificateTypes
-from src.schemas.department_shema import DepartmentShema
+from sesc_auth_sdk.enums.departments import Department
 from src.services.user_service import UserService
 
 
@@ -59,16 +59,16 @@ class DataService:
             or certificate_type == CertificateTypes.Tax
             or certificate_type == CertificateTypes.MilitaryRegistration
         ):
-            return str("educational")
+            return str("educational_department")
 
         elif (
             certificate_type == CertificateTypes.Certificate
             or certificate_type == CertificateTypes.ExtraditionDocuments
         ):
-            return str("CSD")
+            return str("competitive_selection_department")
 
         elif certificate_type == CertificateTypes.Hostel:
-            return str("hostel")
+            return str("dormitory")
 
     def get_template_data(self, headers: HeadersSchema, data: UserSchema, order: CertificateOrder) -> dict:
         certificate_type = headers.certificate_type

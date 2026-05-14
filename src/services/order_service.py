@@ -1,12 +1,13 @@
 from sesc_auth_sdk.schemas.user import UserSchema
 from document_renderer_sdk.client import AsyncDocumentRendererClient
 from src.models.order_model import CertificateOrder
+from sesc_auth_sdk.enums.departments import Department
 from src.schemas.HeadersSchema import HeadersSchema, CertificateTypes
 from src.repository.database_repository import DatabaseRepository, get_base_repository
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.db.database import async_session
 from src.services.data_service import DataService
-from src.schemas.department_shema import DepartmentRequest, DepartmentShema
+from src.schemas.department_shema import DepartmentRequest
 from src.schemas.filter_shema import FilterRequest
 from src.schemas.order_shema import OrderShema
 from src.services.data_service import DataService
@@ -42,7 +43,7 @@ class OrderService:
 
     async def create_order(self, headers: HeadersSchema, data: UserSchema):
 
-        department = DepartmentShema(self.data.get_department(headers=headers))
+        department = Department(self.data.get_department(headers=headers))
         full_name = DataService().get_full_name(user=data)
         certificate_type = headers.certificate_type
 
@@ -57,13 +58,13 @@ class OrderService:
         return order
 
 
-    async def get_orders(self, data: FilterRequest) -> list[OrderShema]:
-        department = DepartmentShema.educational
+    async def get_orders(self, data: FilterRequest, user: UserSchema) -> list[OrderShema]:
+        department = user.department
         return await self.repository.get_orders(data=data, department=DepartmentRequest(department=department))
 
 
-    async def create_document(self):
-        department = DepartmentShema.educational
+    async def create_document(self, user: UserSchema):
+        department = user.department
         orders = await self.repository.get_false_orders(department=DepartmentRequest(department=department))
 
 

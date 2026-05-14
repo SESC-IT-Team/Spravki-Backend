@@ -1,0 +1,27 @@
+{
+  "resource_path": "",
+  "fio": "{{ fio }}",
+  "birth_date": "{{ birth_date }}",
+  "class": "{{ class }}",
+  "start_date": "{{ start_date }}",
+  "certificate_date": "{{ certificate_date }}",
+  "certificate_number": "{{ certificate_number }}",
+  "end_date": "{{ end_date }}",
+  "order_date": "01.09.2026",
+  "order_number": "444/05",
+  "vacations": [
+    {
+      "start": "30.10.2022",
+      "end": "06.11.2022"
+    },
+    {
+      "start": "30.12.2022",
+      "end": "08.01.2023"
+    },
+    {
+      "start": "19.03.2023",
+      "end": "30.03.2023"
+    }
+  ],
+  "academic_director": "М. С. Рябцев"
+}

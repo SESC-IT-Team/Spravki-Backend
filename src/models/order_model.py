@@ -1,15 +1,17 @@
-from sqlalchemy import String, DateTime, func, Column, Integer, Boolean
+from uuid import UUID, uuid4
+from sqlalchemy import String, DateTime, func, Integer, Boolean
 from sqlalchemy.orm import Mapped, mapped_column
 from src.db.database import Base
-
 
 
 class CertificateOrder(Base):
     __tablename__ = "certificate_actions"
 
-    id = Column(Integer, primary_key=True, index=True)
-    full_name = Column(String, nullable=False)
-    department = Column(String, nullable=False)
-    certificate_type = Column(String, nullable=False)
-    is_created = Column(Boolean, nullable=False, default=False)
-    created_at = Column(DateTime, server_default=func.now())
+    id: Mapped[UUID] = mapped_column(primary_key=True, index=True, default=uuid4)
+    number: Mapped[int] = mapped_column(Integer, autoincrement=True)
+    link: Mapped[str] = mapped_column(String, nullable=True)
+    full_name: Mapped[str] = mapped_column(String, nullable=False)
+    department: Mapped[str] = mapped_column(String, nullable=False)
+    certificate_type: Mapped[str] = mapped_column(String, nullable=False)
+    is_created: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    created_at: Mapped[DateTime] = mapped_column(DateTime, server_default=func.now())

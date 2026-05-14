@@ -1,0 +1,13 @@
+{
+  "resource_path": "",
+  "fio": "{{ fio }}",
+  "birth_date": "{{ birth_date }}",
+  "class": "{{ class }}",
+  "start_date": "{{ start_date }}",
+  "end_date": "{{ end_date }}",
+  "certificate_date": "{{ certificate_date }}",
+  "certificate_number": "{{ certificate_number }}",
+  "order_date": "01.09.2026",
+  "order_number": "444/05",
+  "academic_director": "М. С. Рябцев"
+}

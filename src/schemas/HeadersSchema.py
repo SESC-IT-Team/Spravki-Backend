@@ -14,3 +14,4 @@ class CertificateTypes(Enum):
 
 class HeadersSchema(BaseModel):
     certificate_type: CertificateTypes
+

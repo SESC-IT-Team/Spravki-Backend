@@ -1,5 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, update
+
+from src.db.database import get_session
 from src.models.order_model import CertificateOrder
 from src.schemas.HeadersSchema import CertificateTypes
 from src.schemas.department_shema import DepartmentRequest, DepartmentShema
@@ -7,10 +9,17 @@ from src.schemas.filter_shema import FilterRequest, FilterShema
 from src.schemas.order_shema import OrderShema
 
 
-class database_repository:
-    async def create_order(self, session: AsyncSession, full_name: str, certificate_type: CertificateTypes, department: DepartmentShema):
-        order = CertificateOrder(full_name=full_name, department=department.value, certificate_type=certificate_type.value)
-        session.add(order)
+class DatabaseRepository:
+
+
+    def __init__(self, session: AsyncSession):
+        self.session = session
+
+    async def create_order(self, order: CertificateOrder):
+        self.session.add(order)
+        await self.session.commit()  # коммитим здесь
+        await self.session.refresh(order)
+        return order
 
 
 
@@ -66,5 +75,21 @@ class database_repository:
         result = await session.execute(items)
         orders = result.scalars().all()
         return orders
+
+    async def set_link(self, number: int, link: str):
+        stmt = (
+            update(CertificateOrder)
+            .where(CertificateOrder.number == number)
+            .values(link=link)
+        )
+
+        await self.session.execute(stmt)
+        await self.session.commit()
+
+
+
+async def get_base_repository():
+    session = await get_session()
+    return DatabaseRepository(session=session)
 
 

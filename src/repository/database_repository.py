@@ -91,7 +91,7 @@ class DatabaseRepository:
 
 
 async def get_base_repository():
-    session = await async_session()
-    return DatabaseRepository(session=session)
+    async with async_session() as session:
+        return DatabaseRepository(session=session)
 
 

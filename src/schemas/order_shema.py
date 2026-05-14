@@ -1,10 +1,12 @@
 from datetime import datetime
+from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
 
 class OrderShema(BaseModel):
-    id: int
+    id: UUID
+    number: int
     full_name: str
     department: str
     certificate_type: str

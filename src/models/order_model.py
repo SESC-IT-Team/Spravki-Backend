@@ -1,5 +1,7 @@
 from uuid import UUID, uuid4
-from sqlalchemy import String, DateTime, func, Integer, Boolean
+
+
+from sqlalchemy import String, DateTime, func, Integer, Boolean, Sequence
 from sqlalchemy.orm import Mapped, mapped_column
 from src.db.database import Base
 
@@ -8,7 +10,7 @@ class CertificateOrder(Base):
     __tablename__ = "certificate_actions"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, index=True, default=uuid4)
-    number: Mapped[int] = mapped_column(Integer, autoincrement=True, default=0)
+    number: Mapped[int] = mapped_column(Integer, Sequence('document_number_seq'),  nullable=False)
     link: Mapped[str] = mapped_column(String, nullable=True)
     full_name: Mapped[str] = mapped_column(String, nullable=False)
     department: Mapped[str] = mapped_column(String, nullable=False)

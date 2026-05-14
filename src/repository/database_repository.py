@@ -4,7 +4,7 @@ from sqlalchemy import select, update
 from src.db.database import get_session
 from src.models.order_model import CertificateOrder
 from src.schemas.HeadersSchema import CertificateTypes
-from src.schemas.department_shema import DepartmentRequest, DepartmentShema
+from src.schemas.department_shema import DepartmentRequest
 from src.schemas.filter_shema import FilterRequest, FilterShema
 from src.schemas.order_shema import OrderShema
 

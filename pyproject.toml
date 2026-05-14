@@ -18,7 +18,7 @@ dependencies = [
     "asyncpg>=0.31.0",
     "alembic>=1.18.4",
     "sesc-auth-sdk>=1.0.0",
-    "document-renderer-sdk>=1.0.0"
+    "document-renderer-sdk>=1.1.1"
 ]
 
 

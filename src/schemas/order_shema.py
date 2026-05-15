@@ -7,6 +7,7 @@ from pydantic import BaseModel, ConfigDict
 class OrderShema(BaseModel):
     id: UUID
     number: int
+    link: str
     full_name: str
     department: str
     certificate_type: str

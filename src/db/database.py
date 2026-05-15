@@ -4,14 +4,10 @@ from sqlalchemy.orm import declarative_base
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.config import settings
 
-print("DB_HOST:", settings.DB_HOST)
-print("DB_NAME:", settings.DB_NAME)
-print("CONTAINER:", os.getenv("HOSTNAME"))
-
 DATABASE_URL = (
     f"postgresql+asyncpg://"
-    f"{settings.DB_USER}:{settings.DB_PASSWORD}"
-    f"@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}"
+    f"{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}"
+    f"@{settings.POSTGRES_HOST}:{settings.POSTGRES_PORT}/{settings.POSTGRES_NAME}"
 )
 
 

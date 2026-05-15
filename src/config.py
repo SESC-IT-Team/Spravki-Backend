@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     POSTGRES_PORT: int
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str
-    POSTGRES_NAME: str
+    POSTGRES_DB: str
 
     ROOT_PATH: str = '/'
 

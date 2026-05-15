@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sesc_auth_sdk.schemas.user import UserSchema
 from document_renderer_sdk.client import AsyncDocumentRendererClient
 from src.models.order_model import CertificateOrder
@@ -63,9 +65,9 @@ class OrderService:
         return await self.repository.get_orders(data=data, department=DepartmentRequest(department=department))
 
 
-    async def create_document(self, user: UserSchema):
+    async def create_document(self, user: UserSchema, order_id: UUID):
         department = user.department
-        orders = await self.repository.get_false_orders(department=DepartmentRequest(department=department))
+        await self.repository.get_false_orders(department=DepartmentRequest(department=department), order_id=order_id)
 
 
     async def get_my_orders(self,department: DepartmentRequest, user: UserSchema) -> list[OrderShema]:

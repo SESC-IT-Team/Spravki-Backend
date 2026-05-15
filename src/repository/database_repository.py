@@ -7,6 +7,7 @@ from src.schemas.HeadersSchema import CertificateTypes
 from src.schemas.department_shema import DepartmentRequest
 from src.schemas.filter_shema import FilterRequest, FilterShema
 from src.schemas.order_shema import OrderShema
+from uuid import UUID, uuid4
 
 
 class DatabaseRepository:
@@ -66,11 +67,12 @@ class DatabaseRepository:
         orders = result.scalars().all()
         return [OrderShema.model_validate(order) for order in orders]
 
-    async def get_false_orders(self, department: DepartmentRequest):
+    async def get_false_orders(self, department: DepartmentRequest, order_id: UUID):
         user_department = department.department.value
         items = select(CertificateOrder).where(
             (CertificateOrder.is_created == False) &
-            (CertificateOrder.department == user_department)
+            (CertificateOrder.department == user_department) &
+            (CertificateOrder.id == order_id)
         )
         result = await self.session.execute(items)
         orders = result.scalars().all()

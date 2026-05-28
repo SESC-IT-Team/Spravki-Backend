@@ -94,7 +94,7 @@ class DataService:
             "certificate_number": self.get_certificate_number(order=order),  # TODO
         }
 
-        for key, value in replacements.items():
+        for key, value in replacements.items(): 
             if key in template_data:
                 template_data[key] = value
 

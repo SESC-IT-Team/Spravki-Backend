@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Заявление о согласии на выход ребенка</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            margin: 40px auto;
+            width: 800px;
+            line-height: 1.4;
+            font-size: 14pt;
+        }
+        .document {
+            border: none;
+            padding: 0;
+        }
+        .right {
+            text-align: right;
+        }
+        .center {
+            text-align: center;
+        }
+        .bold {
+            font-weight: bold;
+        }
+        .uppercase {
+            text-transform: uppercase;
+        }
+        .signature-block {
+            margin-top: 30px;
+        }
+        .signature-line {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+<div class="document">
+    <!-- Шапка: от кого (справа) -->
+    <div class="right">
+        <span class="bold">{{ representative_name }}</span>,<br>
+        законный представитель несовершеннолетнего ({{ child_name }})
+    </div>
+
+    <!-- Кому: директору (справа) -->
+    <div class="right" style="margin-top: 4px;">
+        Директору Специализированного учебно-научного центра<br>
+        Уральского федерального университета
+    </div>
+
+    <!-- Заголовок -->
+    <div class="center" style="margin-top: 20px;">
+        <span class="bold">ЗАЯВЛЕНИЕ</span><br>
+        <span class="bold">о согласии на самостоятельный выход ребенка за пределы СУНЦ</span>
+    </div>
+
+    <!-- Дата и номер справа -->
+    <div class="right" style="margin-top: 12px;">
+        {{ doc_date }} {{ doc_time }} № {{ doc_number }}
+    </div>
+
+    <!-- Основной текст -->
+    <p style="margin-top: 15px;">
+        Я даю согласие на самостоятельный (без сопровождения лиц) выход моего несовершеннолетнего ребенка за пределы СУНЦ УрФУ. Ответственность за жизнь и здоровье моего ребенка с момента выхода и до момента возвращения в интернат СУНЦ беру на себя.
+    </p>
+
+    <div style="margin: 15px 0;">
+        <div><em>Цель/причина выхода:</em> {{ purpose }}</div>
+        <div><em>Дата и время выхода из интерната:</em> {{ departure_datetime }}</div>
+        <div><em>Дата и время возвращения в интернат:</em> {{ return_datetime }}</div>
+        <div><em>Место (адрес) пребывания:</em> {{ address }}</div>
+        <div><em>Контактное лицо:</em> {{ contact_person }} {{ phone }}</div>
+    </div>
+
+    <p>
+        В соответствии с частью 2 статьи 6 и статьей 9 Федерального закона от 06.04.2011 № 63-ФЗ (с последующим изменением и дополнением) я соглашаюсь, что информация в электронной форме, указанная в настоящем заявлении и подписанная простой электронной подписью (вводом логина и пароля при входе в настоящий сервис), признается электронным документом, равнозначным документу на бумажном носителе, подписанному собственноручной подписью.
+    </p>
+
+    <div style="margin-top: 150px;">
+        <div>Подписание заявления простой электронной подписью посредством</div>
+        <div>программных средств сервера авторизации СУНЦ УрФУ удостоверяю.</div>
+        <div style="margin-top: 10px;"><span class="bold"><em>Директор СУНЦ УрФУ</em></span></div>
+    </div>
+</div>
+</body>
+</html>

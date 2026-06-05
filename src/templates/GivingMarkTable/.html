@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Заявление о выдаче аттестата обучающегося</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            margin: 40px;
+            width: 800px;
+            font-size: 14pt;
+            line-height: 1.4;
+        }
+        .document {
+            padding: 0;
+        }
+        .right {
+            text-align: right;
+        }
+        .left {
+            text-align: left;
+        }
+        .center {
+            text-align: center;
+        }
+        .bold {
+            font-weight: bold;
+        }
+        .field-label {
+            display: inline-block;
+            min-width: 320px;
+            vertical-align: top;
+        }
+        .field-value {
+            display: inline-block;
+            width: 420px;
+            border-bottom: 1px solid #000;
+            padding-left: 4px;
+        }
+        .section {
+            margin-top: 16px;
+        }
+        .note {
+            margin-top: 20px;
+        }
+        /* Новый класс для блока с адресатом: выравнивание текста внутри по левому краю */
+        .address-block {
+            display: inline-block;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+<div class="document">
+    <!-- Адресат: справа, строки выровнены по левому краю -->
+    <div class="left">
+        От кого:<br>
+        {{ from_who }}
+    </div>
+    <div class="right">
+        <div class="address-block">
+            Директору Специализированного<br>
+            учебно-научного центра Уральского<br>
+            федерального университета
+        </div>
+    </div>
+
+    <div class="center section">
+        <div class="bold" style="font-size: 16pt;">ЗАЯВЛЕНИЕ</div>
+        <div class="bold">о выдаче документов обучающегося</div>
+    </div>
+
+    <div class="section">
+        <div>{{ doc_date }} {{ doc_time }} № {{ doc_number }}</div>
+    </div>
+
+    <div class="section">
+        Прошу подготовить к выдаче документы моего ребенка.
+    </div>
+
+    <div class="section">
+        <div>
+            <span class="field-label"><em>Фамилия, имя ребенка:</em> {{ child_name }}</span>
+        </div>
+        <div class="section">
+            <span class="field-label"><em>Класс:</em> {{ child_class }}</span>
+        </div>
+        <div class="section">
+            <span class="field-label"><em>Место требования для аттестата:</em> {{ place_asking }}</span>
+        </div>
+        <div class="section">
+            <span class="field-label"><em>Нужна ли справка о текущей успеваемости обучающегося и/или о результатах промежуточной аттестации:</em> {{ need_performance_certificate }}</span>
+        </div>
+        <div class="section">
+            <span class="field-label"><em>Контактный телефон</em> {{ contact_phone }}</span>
+        </div>
+        <div class="section">
+            <span class="field-label"><em>Контактный e-mail:</em> {{ contact_email }}</span>
+        </div>
+    </div>
+    <div class="note">
+        <div>Подпись: _____________________________</div>
+    </div>
+</div>
+</body>
+</html>

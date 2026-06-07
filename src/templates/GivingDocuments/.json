@@ -1,12 +1,12 @@
 {
-  "from_who": "СтеплерГД",
-  "doc_date": "30.04.2025",
-  "doc_time": "20:15",
-  "doc_number": "303",
-  "child_name": "Сметанин Георгий",
-  "child_class": "11В",
-  "reason_for_departure": "Переход в образовательную организацию по месту жительства",
-  "need_performance_certificate": "да",
-  "contact_phone": "+7 (999) 123-45-67",
-  "contact_email": "parent@example.com"
+  "from_who": "{{ from_who }}",
+  "doc_date": "{{ doc_date }}",
+  "doc_time": "{{ doc_time }}",
+  "doc_number": "{{ doc_number }}",
+  "child_name": "{{ child_name }}",
+  "child_class": "{{ child_class }}",
+  "reason_for_departure": "{{ reason_for_departure }}",
+  "need_performance_certificate": "{{ need_performance_certificate }}",
+  "contact_phone": "{{ contact_phone }}",
+  "contact_email": "{{ contact_email }}"
 }

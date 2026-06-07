@@ -20,7 +20,7 @@ router = APIRouter()
 
 @router.post("/create_order")
 async def create_order(data: dict, user: Annotated[UserSchema, Depends(LyceumAuth([Permissions.Spravki.Orders.create]).return_user)], headers: HeadersSchema, order_service: OrderService = Depends(get_order_service)):
-    await order_service.create_certificate(headers=headers, data=user)
+    await order_service.create_certificate(headers=headers, data=user, order_data=data)
 
 
 @router.post("/get_my_orders")

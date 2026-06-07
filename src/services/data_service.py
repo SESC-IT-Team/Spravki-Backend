@@ -18,6 +18,9 @@ class DataService:
         CertificateTypes.Standard: "Std",
         CertificateTypes.MilitaryRegistration: "Army",
         CertificateTypes.Tax: "TaxFoundation",
+        CertificateTypes.Hostel: "LeavingSESC",
+        CertificateTypes.ExtraditionDocuments: "GivingMarkTable",
+        CertificateTypes.Certificate: "GivingDocuments",
     }
 
     def get_full_name(self, user: UserSchema):
@@ -70,7 +73,7 @@ class DataService:
         elif certificate_type == CertificateTypes.Hostel:
             return str("dormitory")
 
-    def get_template_data(self, headers: HeadersSchema, data: UserSchema, order: CertificateOrder) -> dict:
+    def get_template_data(self, headers: HeadersSchema, data: UserSchema, order: CertificateOrder, order_data: dict) -> dict:
         certificate_type = headers.certificate_type
 
         template_folder = self.TEMPLATE_MAP.get(certificate_type)
@@ -84,15 +87,24 @@ class DataService:
             template_data = json.load(file)
 
         # Заполняем ТОЛЬКО динамические поля
-        replacements = {
+        data = {
             "fio": self.get_full_name(user=data),
             "birth_date": self.get_birth_date(user=data),
             "class": self.get_class(user=data),
             "start_date": self.get_start_date(),
             "end_date": self.get_end_date(),
             "certificate_date": self.get_certificate_date(order=order),  # TODO
-            "certificate_number": self.get_certificate_number(order=order),  # TODO
+            "certificate_number": self.get_certificate_number(order=order),
+            "from_who": self.get_full_name(user=data),
+            "doc_date": self.get_certificate_date(order=order),
+            "doc_time": self.get_certificate_date(order=order),
+            "doc_number": self.get_certificate_number(order=order),
+            "representative_name": self.get_full_name(user=data),
         }
+
+        other_data = order_data
+
+        replacements = data | other_data
 
         for key, value in replacements.items(): 
             if key in template_data:

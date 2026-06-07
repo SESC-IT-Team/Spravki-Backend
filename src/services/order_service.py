@@ -6,9 +6,6 @@ from src.models.order_model import CertificateOrder
 from sesc_auth_sdk.enums.departments import Department
 from src.schemas.HeadersSchema import HeadersSchema, CertificateTypes
 from src.repository.database_repository import DatabaseRepository, get_base_repository
-from sqlalchemy.ext.asyncio import AsyncSession
-from src.db.database import async_session
-from src.services.data_service import DataService
 from src.schemas.department_shema import DepartmentRequest
 from src.schemas.filter_shema import FilterRequest
 from src.schemas.order_shema import OrderShema
@@ -20,9 +17,9 @@ class OrderService:
         self.repository = repository
         self.data = DataService()
 
-    async def create_certificate(self, headers: HeadersSchema, data: UserSchema):
+    async def create_certificate(self, headers: HeadersSchema, data: UserSchema, order_data: dict):
         order = await self.create_order(headers=headers, data=data)
-        template_data = self.data.get_template_data(headers=headers, data=data, order=order)
+        template_data = self.data.get_template_data(headers=headers, data=data, order=order, order_data=order_data)
         template = self.data.get_template_html(headers=headers)
         number = str(self.data.get_certificate_number(order=order))
         filename = "справка_" + number + ".pdf"

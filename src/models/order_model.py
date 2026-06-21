@@ -10,6 +10,7 @@ class CertificateOrder(Base):
     __tablename__ = "certificate_actions"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, index=True, default=uuid4)
+    user_id: Mapped[UUID] = mapped_column(default=uuid4)
     number: Mapped[int] = mapped_column(Integer, Sequence('document_number_seq'),  nullable=False)
     link: Mapped[str] = mapped_column(String, nullable=True)
     full_name: Mapped[str] = mapped_column(String, nullable=False)

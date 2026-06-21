@@ -48,21 +48,20 @@ class DatabaseRepository:
             orders = result.scalars().all()
             return [OrderShema.model_validate(order) for order in orders]
 
-        if data.filter == FilterShema.none:
-            result = await self.session.execute(select(CertificateOrder).where(CertificateOrder.department == user_department))
-            orders = result.scalars().all()
-            return [OrderShema.model_validate(order) for order in orders]
 
 
         result = await self.session.execute(select(CertificateOrder))
         return result.scalars().all()
 
-    async def get_my_orders(self, full_name: str, department: DepartmentRequest) -> list[OrderShema]:
+    async def get_my_orders(self, user_id, department: DepartmentRequest) -> list[OrderShema]:
         c_department = department.department.value
         items = select(CertificateOrder).where(
-            (CertificateOrder.full_name == full_name) &
+            (CertificateOrder.user_id == user_id) &
             (CertificateOrder.department == c_department)
-        )
+        ).order_by(CertificateOrder.created_at.desc())
+
+
+
         result = await self.session.execute(items)
         orders = result.scalars().all()
         return [OrderShema.model_validate(order) for order in orders]

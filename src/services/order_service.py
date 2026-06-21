@@ -43,11 +43,12 @@ class OrderService:
     async def create_order(self, headers: HeadersSchema, data: UserSchema):
 
         department = Department(self.data.get_department(headers=headers))
-        full_name = DataService().get_full_name(user=data)
+        full_name = self.data.get_full_name(user=data)
         certificate_type = headers.certificate_type
+        user_id = self.data.get_user_id(user=data)
 
         order = CertificateOrder(full_name=full_name, department=department.value,
-                                 certificate_type=certificate_type.value)
+                                 certificate_type=certificate_type.value, user_id=user_id)
 
           # создаём сессию здесь
         await self.repository.create_order(
@@ -68,8 +69,8 @@ class OrderService:
 
 
     async def get_my_orders(self,department: DepartmentRequest, user: UserSchema) -> list[OrderShema]:
-        full_name = DataService().get_full_name(user=user)
-        return await self.repository.get_my_orders(full_name=full_name, department=department)
+        user_id = self.data.get_user_id(user=user)
+        return await self.repository.get_my_orders(user_id=user_id, department=department)
 
 
 

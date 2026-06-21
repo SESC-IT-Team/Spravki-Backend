@@ -51,6 +51,10 @@ class DataService:
         number = order.number
         return number
 
+    def get_user_id(self, user: UserSchema):
+        user_id = user.id
+        return user_id
+
 
 
     def get_department(self, headers: HeadersSchema):

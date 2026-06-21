@@ -8,8 +8,8 @@ from src.services.order_service import OrderService, get_order_service
 from src.db.database import get_session
 from uuid import UUID, uuid4
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.schemas.filter_shema import FilterRequest
-from typing import Annotated
+from src.schemas.filter_shema import FilterRequest, FilterShema
+from typing import Annotated, Optional
 from sesc_auth_sdk.schemas.user import UserSchema
 from sesc_auth_sdk.dependencies import LyceumAuth
 from sesc_auth_sdk.enums.role import Role
@@ -28,7 +28,9 @@ async def get_my_orders(user: Annotated[UserSchema, Depends(LyceumAuth([Permissi
     return await order_service.get_my_orders(department=department, user=user)
 
 @router.post("/get_orders")
-async def get_orders(user: Annotated[UserSchema, Depends(LyceumAuth([Permissions.Spravki.Orders.get]).return_user)], data: FilterRequest, order_service: OrderService = Depends(get_order_service)) -> list[OrderShema]:
+async def get_orders(user: Annotated[UserSchema, Depends(LyceumAuth([Permissions.Spravki.Orders.get]).return_user)], data: Optional[FilterRequest] = None, order_service: OrderService = Depends(get_order_service)) -> list[OrderShema]:
+    if data is None:
+        data = FilterRequest(filter=FilterShema.date_desc)
     return await order_service.get_orders(data=data, user=user)
 
 @router.post("/download")

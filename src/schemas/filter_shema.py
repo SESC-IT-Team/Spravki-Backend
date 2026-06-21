@@ -7,7 +7,7 @@ class FilterShema(str, Enum):
     date_desc = "date_desc"
     status_true = "status_true"
     status_false = "status_false"
-    none = "none"
+
 
 class FilterRequest(BaseModel):
     filter: FilterShema

@@ -29,12 +29,26 @@ class DatabaseRepository:
         user_department = department.department.value
 
         if data.filter == FilterShema.date_asc:
-            result = await self.session.execute(select(CertificateOrder).where(CertificateOrder.department == user_department).order_by(CertificateOrder.created_at.asc()))
+            result = await self.session.execute(
+                select(CertificateOrder)
+                .where(CertificateOrder.department == user_department)
+                .order_by(
+                    CertificateOrder.is_created.asc(),
+                    CertificateOrder.created_at.asc()
+                )
+            )
             orders = result.scalars().all()
             return [OrderShema.model_validate(order) for order in orders]
 
         if data.filter == FilterShema.date_desc:
-            result = await self.session.execute(select(CertificateOrder).where(CertificateOrder.department == user_department).order_by(CertificateOrder.created_at.desc()))
+            result = await self.session.execute(
+                select(CertificateOrder)
+                .where(CertificateOrder.department == user_department)
+                .order_by(
+                    CertificateOrder.is_created.asc(),
+                    CertificateOrder.created_at.desc()
+                )
+            )
             orders = result.scalars().all()
             return [OrderShema.model_validate(order) for order in orders]
 

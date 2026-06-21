@@ -19,10 +19,10 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=traefik-public
-      - traefik.http.routers.spravki-back.rule=Host(`sesc-it-team.ru`) && PathPrefix(`/spravki-back`)
+      - traefik.http.routers.spravki-back.rule=Host(`${DOMAIN}`) && PathPrefix(`/spravki-back`)
       - traefik.http.routers.spravki-back.entrypoints=web
       - traefik.http.routers.spravki-back.middlewares=spravki-back-strip
-      - traefik.http.routers.spravki-back-secure.rule=Host(`sesc-it-team.ru`) && PathPrefix(`/spravki-back`)
+      - traefik.http.routers.spravki-back-secure.rule=Host(`${DOMAIN}`) && PathPrefix(`/spravki-back`)
       - traefik.http.routers.spravki-back-secure.entrypoints=websecure
       - traefik.http.routers.spravki-back-secure.tls=true
       - traefik.http.routers.spravki-back-secure.tls.certresolver=letsencrypt

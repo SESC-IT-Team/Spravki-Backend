@@ -19,32 +19,54 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # 1. Добавляем новые колонки (как у тебя)
-    op.add_column('certificate_actions', sa.Column('number', sa.Integer(), autoincrement=True, nullable=False))
+    # 1. Добавляем колонку number с временным значением по умолчанию
+    # Сначала добавляем как NULL
+    op.add_column('certificate_actions', sa.Column('number', sa.Integer(), nullable=True))
+
+    # Заполняем существующие строки (например, порядковыми номерами)
+    op.execute("""
+        UPDATE certificate_actions 
+        SET number = subquery.row_num 
+        FROM (
+            SELECT id, ROW_NUMBER() OVER (ORDER BY id) as row_num 
+            FROM certificate_actions
+        ) AS subquery 
+        WHERE certificate_actions.id = subquery.id
+    """)
+
+    # Теперь делаем NOT NULL
+    op.alter_column('certificate_actions', 'number', nullable=False)
+
+    # Создаем SEQUENCE для автоинкремента
+    op.execute("CREATE SEQUENCE IF NOT EXISTS certificate_actions_number_seq")
+    op.execute(
+        "ALTER TABLE certificate_actions ALTER COLUMN number SET DEFAULT nextval('certificate_actions_number_seq')")
+
+    # 2. Добавляем колонку link
     op.add_column('certificate_actions', sa.Column('link', sa.String(), nullable=True))
 
-    # 2. Временная колонка для UUID
+    # 3. Временная колонка для UUID
     op.add_column('certificate_actions', sa.Column('_id_uuid', sa.Uuid(), nullable=True))
 
-    # 3. Заполняем новыми UUID
+    # 4. Заполняем новыми UUID
     op.execute("UPDATE certificate_actions SET _id_uuid = gen_random_uuid()")
 
-    # 4. Делаем NOT NULL
+    # 5. Делаем NOT NULL
     op.alter_column('certificate_actions', '_id_uuid', nullable=False)
 
-    # 5. Убираем старый PK
+    # 6. Убираем старый PK
     op.drop_constraint('certificate_actions_pkey', 'certificate_actions', type_='primary')
 
-    # 6. Удаляем старую колонку id
+    # 7. Удаляем старую колонку id
     op.drop_column('certificate_actions', 'id')
 
-    # 7. Переименовываем новую
+    # 8. Переименовываем новую
     op.alter_column('certificate_actions', '_id_uuid', new_column_name='id')
 
-    # 8. Восстанавливаем PK
+    # 9. Восстанавливаем PK
     op.create_primary_key('certificate_actions_pkey', 'certificate_actions', ['id'])
 
-    # 9. Остальные изменения
+    # 10. Остальные изменения
     op.alter_column('certificate_actions', 'created_at',
                     existing_type=postgresql.TIMESTAMP(),
                     nullable=False,

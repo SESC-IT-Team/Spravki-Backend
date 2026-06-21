@@ -68,7 +68,7 @@ class OrderService:
 
 
     async def get_my_orders(self,department: DepartmentRequest, user: UserSchema) -> list[OrderShema]:
-        full_name = user.first_name + " " + user.last_name
+        full_name = DataService().get_full_name(user=user)
         return await self.repository.get_my_orders(full_name=full_name, department=department)
 
 

@@ -1,21 +1,19 @@
+from typing import Annotated, Optional
+
 from fastapi import APIRouter
 from fastapi.params import Depends
+from sesc_auth_sdk.dependencies import LyceumAuth
+from sesc_auth_sdk.enums.permission import Permissions
+from sesc_auth_sdk.schemas.user import UserSchema
 
 from src.schemas.DownloadSchema import DownloadSchema
 from src.schemas.HeadersSchema import HeadersSchema
 from src.schemas.department_shema import DepartmentRequest
-from src.schemas.order_shema import OrderShema
-from src.services.user_service import UserService, get_user_service
-from src.services.order_service import OrderService, get_order_service
-from src.db.database import get_session
-from uuid import UUID, uuid4
-from sqlalchemy.ext.asyncio import AsyncSession
 from src.schemas.filter_shema import FilterRequest, FilterShema
-from typing import Annotated, Optional
-from sesc_auth_sdk.schemas.user import UserSchema
-from sesc_auth_sdk.dependencies import LyceumAuth
-from sesc_auth_sdk.enums.role import Role
-from sesc_auth_sdk.enums.permission import Permissions
+from src.schemas.order_shema import OrderShema
+from src.services.order_service import OrderService, get_order_service
+from src.services.user_service import UserService, get_user_service
+
 router = APIRouter()
 
 

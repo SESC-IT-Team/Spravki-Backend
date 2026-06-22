@@ -1,5 +1,7 @@
 from fastapi import APIRouter
 from fastapi.params import Depends
+
+from src.schemas.DownloadSchema import DownloadSchema
 from src.schemas.HeadersSchema import HeadersSchema
 from src.schemas.department_shema import DepartmentRequest
 from src.schemas.order_shema import OrderShema
@@ -34,7 +36,5 @@ async def get_orders(user: Annotated[UserSchema, Depends(LyceumAuth([Permissions
     return await order_service.get_orders(data=data, user=user)
 
 @router.post("/download")
-async def create_document(order_id: UUID, user: Annotated[UserSchema, Depends(LyceumAuth([Permissions.Spravki.Orders.get]).return_user)], service: UserService = Depends(get_user_service), order_service: OrderService = Depends(get_order_service)):
-    await order_service.create_document(user=user, order_id=order_id)
-
-
+async def create_document(data: DownloadSchema, user: Annotated[UserSchema, Depends(LyceumAuth([Permissions.Spravki.Orders.get]).return_user)], service: UserService = Depends(get_user_service), order_service: OrderService = Depends(get_order_service)):
+    await order_service.create_document(user=user, order_id=data.order_id)

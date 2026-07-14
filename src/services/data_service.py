@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from sesc_auth_sdk.schemas.user import UserSchema
+from sesc_auth_sdk.schemas.user import User
 from datetime import datetime
 
 from src.models.order_model import CertificateOrder
@@ -23,15 +23,15 @@ class DataService:
         CertificateTypes.Certificate: "GivingDocuments",
     }
 
-    def get_full_name(self, user: UserSchema):
+    def get_full_name(self, user: User):
         full_name = user.full_name
         return full_name
 
-    def get_birth_date(self, user: UserSchema):
+    def get_birth_date(self, user: User):
         birth_date = user.birthday
         return birth_date
 
-    def get_class(self, user: UserSchema):
+    def get_class(self, user: User):
         class_name = user.class_name
         return class_name
 
@@ -51,7 +51,7 @@ class DataService:
         number = order.number
         return number
 
-    def get_user_id(self, user: UserSchema):
+    def get_user_id(self, user: User):
         user_id = user.id
         return user_id
 
@@ -77,7 +77,7 @@ class DataService:
         elif certificate_type == CertificateTypes.Hostel:
             return str("dormitory")
 
-    def get_template_data(self, headers: HeadersSchema, data: UserSchema, order: CertificateOrder, order_data: dict) -> dict:
+    def get_template_data(self, headers: HeadersSchema, data: User, order: CertificateOrder, order_data: dict) -> dict:
         certificate_type = headers.certificate_type
 
         template_folder = self.TEMPLATE_MAP.get(certificate_type)

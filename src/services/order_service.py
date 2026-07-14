@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sesc_auth_sdk.schemas.user import UserSchema
+from sesc_auth_sdk.schemas.user import User
 from document_renderer_sdk.client import AsyncDocumentRendererClient
 from src.models.order_model import CertificateOrder
 from sesc_auth_sdk.enums.departments import Department
@@ -17,7 +17,7 @@ class OrderService:
         self.repository = repository
         self.data = DataService()
 
-    async def create_certificate(self, headers: HeadersSchema, data: UserSchema, order_data: dict):
+    async def create_certificate(self, headers: HeadersSchema, data: User, order_data: dict):
         order = await self.create_order(headers=headers, data=data)
         template_data = self.data.get_template_data(headers=headers, data=data, order=order, order_data=order_data)
         template = self.data.get_template_html(headers=headers)
@@ -40,7 +40,7 @@ class OrderService:
 
 
 
-    async def create_order(self, headers: HeadersSchema, data: UserSchema):
+    async def create_order(self, headers: HeadersSchema, data: User):
 
         department = Department(self.data.get_department(headers=headers))
         full_name = self.data.get_full_name(user=data)
@@ -58,17 +58,17 @@ class OrderService:
         return order
 
 
-    async def get_orders(self, data: FilterRequest, user: UserSchema) -> list[OrderShema]:
+    async def get_orders(self, data: FilterRequest, user: User) -> list[OrderShema]:
         department = user.department
         return await self.repository.get_orders(data=data, department=DepartmentRequest(department=department))
 
 
-    async def create_document(self, user: UserSchema, order_id: UUID):
+    async def create_document(self, user: User, order_id: UUID):
         department = user.department
         await self.repository.get_false_orders(department=DepartmentRequest(department=department), order_id=order_id)
 
 
-    async def get_my_orders(self,department: DepartmentRequest, user: UserSchema) -> list[OrderShema]:
+    async def get_my_orders(self,department: DepartmentRequest, user: User) -> list[OrderShema]:
         user_id = self.data.get_user_id(user=user)
         return await self.repository.get_my_orders(user_id=user_id, department=department)
 

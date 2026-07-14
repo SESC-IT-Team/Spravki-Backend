@@ -2,9 +2,12 @@ from typing import Annotated, Optional
 
 from fastapi import APIRouter
 from fastapi.params import Depends
-from sesc_auth_sdk.dependencies import LyceumAuth
-from sesc_auth_sdk.enums.permission import Permissions
-from sesc_auth_sdk.schemas.user import UserSchema
+from sesc_auth_sdk.enums.scope import Scope
+from sesc_auth_sdk.dependencies import LyceumAuth, create_jwks_manager_dependency
+from sesc_auth_sdk.routers.auth_router import create_auth_router
+from sesc_auth_sdk.schemas.user import User
+from sesc_auth_sdk.services.jwks_manager import JWKSManager
+from sesc_auth_sdk.settings import TokenValidationSettings
 
 from src.schemas.DownloadSchema import DownloadSchema
 from src.schemas.HeadersSchema import HeadersSchema
@@ -16,23 +19,25 @@ from src.services.user_service import UserService, get_user_service
 
 router = APIRouter()
 
-
-
+class Auth(LyceumAuth):
+    _get_jwks_manager = create_jwks_manager_dependency(JWKSManager(TokenValidationSettings(_env_file='.env')))
+    # user_service_url =
 @router.post("/create_order")
-async def create_order(data: dict, user: Annotated[UserSchema, Depends(LyceumAuth([Permissions.Spravki.Orders.create]).return_user)], headers: HeadersSchema, order_service: OrderService = Depends(get_order_service)):
+async def create_order(data: dict, user: Annotated[User, Depends(Auth([Scope.spravki_orders_create]).return_user)], headers: HeadersSchema, order_service: OrderService = Depends(get_order_service)):
     await order_service.create_certificate(headers=headers, data=user, order_data=data)
 
 
 @router.post("/get_my_orders")
-async def get_my_orders(user: Annotated[UserSchema, Depends(LyceumAuth([Permissions.Spravki.Orders.get_my]).return_user)], department: DepartmentRequest, order_service: OrderService = Depends(get_order_service)) -> list[OrderShema]:
+async def get_my_orders(user: Annotated[User, Depends(Auth([Scope.spravki_orders_get_my]).return_user)], department: DepartmentRequest, order_service: OrderService = Depends(get_order_service)) -> list[OrderShema]:
     return await order_service.get_my_orders(department=department, user=user)
 
 @router.post("/get_orders")
-async def get_orders(user: Annotated[UserSchema, Depends(LyceumAuth([Permissions.Spravki.Orders.get]).return_user)], data: Optional[FilterRequest] = None, order_service: OrderService = Depends(get_order_service)) -> list[OrderShema]:
+async def get_orders(user: Annotated[User, Depends(Auth([Scope.spravki_orders_get]).return_user)], data: Optional[FilterRequest] = None, order_service: OrderService = Depends(get_order_service)) -> list[OrderShema]:
     if data is None:
         data = FilterRequest(filter=FilterShema.date_desc)
     return await order_service.get_orders(data=data, user=user)
 
 @router.post("/download")
-async def create_document(data: DownloadSchema, user: Annotated[UserSchema, Depends(LyceumAuth([Permissions.Spravki.Orders.get]).return_user)], service: UserService = Depends(get_user_service), order_service: OrderService = Depends(get_order_service)):
+async def create_document(data: DownloadSchema, user: Annotated[User, Depends(Auth([Scope.spravki_orders_get]).return_user)], service: UserService = Depends(get_user_service), order_service: OrderService = Depends(get_order_service)):
     await order_service.create_document(user=user, order_id=data.order_id)
+

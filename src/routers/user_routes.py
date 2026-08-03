@@ -9,6 +9,7 @@ from sesc_auth_sdk.schemas.user import User
 from sesc_auth_sdk.services.jwks_manager import JWKSManager
 from sesc_auth_sdk.settings import TokenValidationSettings
 
+from src.dependecies.auth import Auth
 from src.schemas.DownloadSchema import DownloadSchema
 from src.schemas.HeadersSchema import HeadersSchema
 from src.schemas.department_shema import DepartmentRequest
@@ -19,9 +20,7 @@ from src.services.user_service import UserService, get_user_service
 
 router = APIRouter()
 
-class Auth(LyceumAuth):
-    _get_jwks_manager = create_jwks_manager_dependency(JWKSManager(TokenValidationSettings(_env_file='.env')))
-    # user_service_url =
+
 @router.post("/create_order")
 async def create_order(data: dict, user: Annotated[User, Depends(Auth([Scope.spravki_orders_create]).return_user)], headers: HeadersSchema, order_service: OrderService = Depends(get_order_service)):
     await order_service.create_certificate(headers=headers, data=user, order_data=data)

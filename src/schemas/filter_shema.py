@@ -10,4 +10,4 @@ class FilterShema(str, Enum):
 
 
 class FilterRequest(BaseModel):
-    filter: FilterShema
+    filter: FilterShema | None = None

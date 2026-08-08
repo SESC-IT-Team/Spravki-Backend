@@ -31,8 +31,8 @@ async def get_my_orders(user: Annotated[User, Depends(Auth([Scope.spravki_orders
 
 @router.get("/orders")
 async def get_orders(user: Annotated[User, Depends(Auth([Scope.spravki_orders_get]).return_user)], data: FilterRequest = Depends(), order_service: OrderService = Depends(get_order_service)) -> list[OrderShema]:
-    if data is None:
-        data = FilterRequest(filter=FilterShema.date_desc)
+    if data.filter is None:
+        data.filter = FilterShema.date_desc
     return await order_service.get_orders(data=data, user=user)
 
 @router.post("/download")

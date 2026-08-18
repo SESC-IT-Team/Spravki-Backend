@@ -1,5 +1,6 @@
 from typing import Annotated, Optional
 
+from aiostream import await_
 from fastapi import APIRouter
 from fastapi import Depends
 from sesc_auth_sdk.enums.scope import Scope
@@ -36,6 +37,10 @@ async def get_orders(user: Annotated[User, Depends(Auth([Scope.spravki_orders_ge
     return await order_service.get_orders(data=data, user=user)
 
 @router.post("/download")
-async def create_document(data: DownloadSchema, user: Annotated[User, Depends(Auth([Scope.spravki_orders_get]).return_user)], service: UserService = Depends(get_user_service), order_service: OrderService = Depends(get_order_service)):
+async def create_document(data: DownloadSchema, user: Annotated[User, Depends(Auth([Scope.spravki_orders_get]).return_user)], order_service: OrderService = Depends(get_order_service)):
     await order_service.create_document(user=user, order_id=data.order_id)
 
+
+@router.get("/get_children")
+async def get_children(user: User, headers: HeadersSchema, user_service: UserService = Depends(get_user_service)):
+    return user_service.get_children(user=user, headers=headers)

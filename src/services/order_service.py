@@ -2,6 +2,8 @@ from uuid import UUID
 
 from sesc_auth_sdk.schemas.user import User
 from document_renderer_sdk.client import AsyncDocumentRendererClient
+
+from services.user_service import UserService
 from src.models.order_model import CertificateOrder
 from sesc_auth_sdk.enums.departments import Department
 from src.schemas.HeadersSchema import HeadersSchema, CertificateTypes
@@ -16,8 +18,10 @@ class OrderService:
     def __init__(self, repository: DatabaseRepository):
         self.repository = repository
         self.data = DataService()
+        self.user = UserService()
 
     async def create_certificate(self, headers: HeadersSchema, data: User, order_data: dict):
+        self.user.check_role(user=data, headers=headers)
         order = await self.create_order(headers=headers, data=data)
         template_data = self.data.get_template_data(headers=headers, data=data, order=order, order_data=order_data)
         template = self.data.get_template_html(headers=headers)

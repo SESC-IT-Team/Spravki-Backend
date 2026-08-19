@@ -11,7 +11,7 @@ from src.models.order_model import CertificateOrder
 
 app = FastAPI(root_path=settings.ROOT_PATH)
 app.include_router(user_router)
-app.include_router(create_auth_router(AuthRouterSettings(_env_file='.env')))
+app.include_router(create_auth_router(AuthRouterSettings(_env_file='.env')), prefix="/auth")
 
 
 

@@ -1,6 +1,9 @@
+from sesc_auth_sdk.enums import role
+from sesc_auth_sdk.schemas.user import User
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update
 
+from services.user_service import UserService
 from src.db.database import get_session, async_session
 from src.models.order_model import CertificateOrder
 from src.schemas.HeadersSchema import CertificateTypes
@@ -15,6 +18,7 @@ class DatabaseRepository:
 
     def __init__(self, session: AsyncSession):
         self.session = session
+        self.user = UserService()
 
     async def create_order(self, order: CertificateOrder):
         self.session.add(order)
@@ -64,21 +68,37 @@ class DatabaseRepository:
 
 
 
-        result = await self.session.execute(select(CertificateOrder))
-        return result.scalars().all()
 
-    async def get_my_orders(self, user_id, department: DepartmentRequest) -> list[OrderShema]:
+
+    async def get_my_orders(self, user: User, department: DepartmentRequest) -> list[OrderShema]:
         c_department = department.department.value
-        items = select(CertificateOrder).where(
-            (CertificateOrder.user_id == user_id) &
-            (CertificateOrder.department == c_department)
-        ).order_by(CertificateOrder.created_at.desc())
+        user_id = user.id
+        if role.Role.student in user.roles:
+            items = select(CertificateOrder).where(
+                (CertificateOrder.child_id == user_id) &
+                (CertificateOrder.department == c_department)
+            ).order_by(CertificateOrder.created_at.desc())
+
+            result = await self.session.execute(items)
+            orders = result.scalars().all()
+            return [OrderShema.model_validate(order) for order in orders]
+
+        elif role.Role.parent in user.roles:
+            children_id: list[UUID] = self.user.get_children_id()
+
+
+            items = select(CertificateOrder).where(
+                (CertificateOrder.child_id in children_id) &
+                (CertificateOrder.department == c_department)
+            ).order_by(CertificateOrder.created_at.desc())
+
+            result = await self.session.execute(items)
+            orders = result.scalars().all()
+            return [OrderShema.model_validate(order) for order in orders]
 
 
 
-        result = await self.session.execute(items)
-        orders = result.scalars().all()
-        return [OrderShema.model_validate(order) for order in orders]
+
 
     async def get_false_orders(self, department: DepartmentRequest, order_id: UUID):
         user_department = department.department.value

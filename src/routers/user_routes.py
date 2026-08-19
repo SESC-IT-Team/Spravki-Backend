@@ -10,6 +10,7 @@ from sesc_auth_sdk.schemas.user import User
 from sesc_auth_sdk.services.jwks_manager import JWKSManager
 from sesc_auth_sdk.settings import TokenValidationSettings
 
+from schemas.create_shema import CreateShema
 from src.dependecies.auth import Auth
 from src.schemas.DownloadSchema import DownloadSchema
 from src.schemas.HeadersSchema import HeadersSchema
@@ -22,7 +23,7 @@ from src.services.user_service import UserService, get_user_service
 router = APIRouter()
 
 @router.post("/create_order")
-async def create_order(data: dict, user: Annotated[User, Depends(Auth([Scope.spravki_orders_create]).return_user)], headers: HeadersSchema, order_service: OrderService = Depends(get_order_service)):
+async def create_order(data: dict, child_id: CreateShema, user: Annotated[User, Depends(Auth([Scope.spravki_orders_create]).return_user)], headers: HeadersSchema, order_service: OrderService = Depends(get_order_service)):
     await order_service.create_certificate(headers=headers, data=user, order_data=data)
 
 
@@ -31,13 +32,13 @@ async def get_my_orders(user: Annotated[User, Depends(Auth([Scope.spravki_orders
     return await order_service.get_my_orders(department=department, user=user)
 
 @router.get("/orders")
-async def get_orders(user: Annotated[User, Depends(Auth([Scope.spravki_orders_get]).return_user)], data: FilterRequest = Depends(), order_service: OrderService = Depends(get_order_service)) -> list[OrderShema]:
+async def get_orders(user: Annotated[User, Depends(Auth([Scope.spravki_orders_get]).return_user)], department: DepartmentRequest, data: FilterRequest = Depends(), order_service: OrderService = Depends(get_order_service)) -> list[OrderShema]:
     if data.filter is None:
         data.filter = FilterShema.date_desc
-    return await order_service.get_orders(data=data, user=user)
+    return await order_service.get_orders(data=data, user=user, department=department)
 
 @router.post("/download")
-async def create_document(data: DownloadSchema, user: Annotated[User, Depends(Auth([Scope.spravki_orders_get]).return_user)], order_service: OrderService = Depends(get_order_service)):
+async def create_document(data: DownloadSchema, department: DepartmentRequest, user: Annotated[User, Depends(Auth([Scope.spravki_orders_get]).return_user)], order_service: OrderService = Depends(get_order_service)):
     await order_service.create_document(user=user, order_id=data.order_id)
 
 

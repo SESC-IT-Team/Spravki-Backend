@@ -1,37 +1,140 @@
-from fastapi import Request
-from src.repository.user_repository import UserRepository, get_user_repository
-from src.schemas.user_schema import UserSchema
-from fastapi.params import Depends
-from sqlalchemy.ext.asyncio import AsyncSession
+from uuid import UUID
 
+from aiostream.stream import throw
+from fastapi import HTTPException
+from pydantic import TypeAdapter, ValidationError
+from sesc_auth_sdk.schemas.user import User
+from sesc_auth_sdk.enums import role
+from starlette import status
+import requests
+
+from src.config import settings
+from src.schemas.HeadersSchema import HeadersSchema, CertificateTypes
+from src.schemas.create_shema import CreateShema
+from src.schemas.department_shema import DepartmentRequest
 
 
 class UserService:
+    def __init__(self):
+        pass
 
-    def __init__(self, repository: UserRepository):
-        self.repository = repository
+    def check_role(self, user: User, headers: HeadersSchema):
+        if headers.certificate_type in [CertificateTypes.Standard, CertificateTypes.Tax, CertificateTypes.MilitaryRegistration, CertificateTypes.SocialFoundation]:
+            if role.Role.student in user.roles:
+                return
 
-    def get_current_user(self) -> UserSchema:
-        return UserSchema({
-            "id": "c1e8cd06-6748-4a56-9002-403c4c729a58",
-            "last_name": "Пупкин",
-            "first_name": "Ваня",
-            "middle_name": "Петрович",
-            "role": "student",
-            "gender": "male",
-            "class_name": "8Е",
-            "graduation_year": "2029",
-            "login": "admin",
-            "created_at": "2026-02-17T06:17:27.599959Z",
-            "updated_at": "2026-02-17T06:17:27.599961Z"
-        })
-
-    def check_admin(self):
-        ...
+            else:
+                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
 
 
+        elif headers.certificate_type in [CertificateTypes.ExtraditionDocuments, CertificateTypes.Certificate]:
+            if role.Role.student in user.roles:
+                return
+
+            elif role.Role.parent in user.roles:
+                return
+
+            else:
+                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+
+
+        elif headers.certificate_type == CertificateTypes.Hostel:
+            if role.Role.parent in user.roles:
+                return
+            else:
+                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
 
 
 
-def get_user_service(repository: UserRepository = Depends(get_user_repository)) -> UserService:
-    return UserService(repository=repository)
+
+    def get_children(self, user: User, headers: HeadersSchema):
+        if role.Role.student in user.roles:
+            return [user]
+
+        elif role.Role.parent in user.roles:
+            res = requests.get(settings.user_service_url + "/api/v1/users/me/children").json()
+            try:
+                # 2. Создаем адаптер для списка моделей User
+                user_list_adapter = TypeAdapter(list[User])
+
+                # 3. Валидируем массив.
+                # На выходе получаем чистый Python-список из объектов User
+                validated_users: list[User] = user_list_adapter.validate_python(res)
+
+                if headers.certificate_type == CertificateTypes.Hostel:
+                    users: list[User] = []
+                    for i in validated_users:
+                        if i.lives_in_dormitory:
+                            users.append(i)
+
+                    return users
+                else:
+                    return validated_users
+
+
+
+            except ValidationError as e:
+
+                print("Данные не соответствуют модели User:")
+                print(e.json(indent=2))
+
+
+
+
+
+
+            return res
+
+    def check_department_role(self, department: DepartmentRequest):
+        department_name = department.department.value
+        res = requests.get(f"/api/v1/departments/{department_name}/members/me", ).json()
+        if res.status_code == 200:
+            return
+        else:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+
+
+    def get_child(self, child_id: CreateShema):
+        res = requests.get(f"/api/v1/users/me/children/{child_id.child_id}").json()
+        try:
+            # 2. Создаем адаптер для списка моделей User
+            user_adapter = TypeAdapter(User)
+
+            # 3. Валидируем массив.
+            # На выходе получаем чистый Python-список из объектов User
+            validated_user: User = user_adapter.validate_python(res)
+            return validated_user
+
+
+
+
+        except ValidationError as e:
+
+            print("Данные не соответствуют модели User:")
+            print(e.json(indent=2))
+
+
+    def get_children_id(self):
+        res = requests.get("/api/v1/users/me/children").json()
+        try:
+            # 2. Создаем адаптер для списка моделей User
+            user_list_adapter = TypeAdapter(list[User])
+
+            # 3. Валидируем массив.
+            # На выходе получаем чистый Python-список из объектов User
+            validated_users: list[User] = user_list_adapter.validate_python(res)
+
+            users_id: list[UUID] = []
+            for user in validated_users:
+                users_id.append(user.id)
+
+            return users_id
+
+        except ValidationError as e:
+
+            print("Данные не соответствуют модели User:")
+            print(e.json(indent=2))
+
+
+async def get_user_service():
+    return UserService()

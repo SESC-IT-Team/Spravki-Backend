@@ -1,9 +1,12 @@
 from uuid import UUID
 
-from sesc_auth_sdk.schemas.user import UserSchema
+from sesc_auth_sdk.schemas.user import User
 from document_renderer_sdk.client import AsyncDocumentRendererClient
+
+from src.schemas.create_shema import CreateShema
+from src.services.user_service import UserService
 from src.models.order_model import CertificateOrder
-from sesc_auth_sdk.enums.departments import Department
+from sesc_auth_sdk.enums.department import Department
 from src.schemas.HeadersSchema import HeadersSchema, CertificateTypes
 from src.repository.database_repository import DatabaseRepository, get_base_repository
 from src.schemas.department_shema import DepartmentRequest
@@ -16,9 +19,11 @@ class OrderService:
     def __init__(self, repository: DatabaseRepository):
         self.repository = repository
         self.data = DataService()
+        self.user = UserService()
 
-    async def create_certificate(self, headers: HeadersSchema, data: UserSchema, order_data: dict):
-        order = await self.create_order(headers=headers, data=data)
+    async def create_certificate(self, headers: HeadersSchema, data: User, order_data: dict, child_id: CreateShema):
+        self.user.check_role(user=data, headers=headers)
+        order = await self.create_order(headers=headers, data=data, child_id=child_id)
         template_data = self.data.get_template_data(headers=headers, data=data, order=order, order_data=order_data)
         template = self.data.get_template_html(headers=headers)
         number = str(self.data.get_certificate_number(order=order))
@@ -40,15 +45,17 @@ class OrderService:
 
 
 
-    async def create_order(self, headers: HeadersSchema, data: UserSchema):
+    async def create_order(self, headers: HeadersSchema, data: User, child_id: CreateShema):
 
         department = Department(self.data.get_department(headers=headers))
-        full_name = self.data.get_full_name(user=data)
+        child = self.user.get_child(child_id=child_id)
+        full_name = child.full_name
         certificate_type = headers.certificate_type
         user_id = self.data.get_user_id(user=data)
+        child_id = child_id
 
         order = CertificateOrder(full_name=full_name, department=department.value,
-                                 certificate_type=certificate_type.value, user_id=user_id)
+                                 certificate_type=certificate_type.value, user_id=user_id, child_id=child_id.child_id)
 
           # создаём сессию здесь
         await self.repository.create_order(
@@ -58,19 +65,18 @@ class OrderService:
         return order
 
 
-    async def get_orders(self, data: FilterRequest, user: UserSchema) -> list[OrderShema]:
-        department = user.department
-        return await self.repository.get_orders(data=data, department=DepartmentRequest(department=department))
+    async def get_orders(self, data: FilterRequest, user: User, department: DepartmentRequest) -> list[OrderShema]:
+        self.user.check_department_role(department=department)
+        return await self.repository.get_orders(data=data, department=department)
 
 
-    async def create_document(self, user: UserSchema, order_id: UUID):
-        department = user.department
-        await self.repository.get_false_orders(department=DepartmentRequest(department=department), order_id=order_id)
+    async def create_document(self, user: User, order_id: UUID, department: DepartmentRequest):
+        self.user.check_department_role(department=department)
+        await self.repository.get_false_orders(department=department, order_id=order_id)
 
 
-    async def get_my_orders(self,department: DepartmentRequest, user: UserSchema) -> list[OrderShema]:
-        user_id = self.data.get_user_id(user=user)
-        return await self.repository.get_my_orders(user_id=user_id, department=department)
+    async def get_my_orders(self,department: DepartmentRequest, user: User) -> list[OrderShema]:
+        return await self.repository.get_my_orders(user=user, department=department)
 
 
 

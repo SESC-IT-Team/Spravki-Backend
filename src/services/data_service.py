@@ -6,7 +6,7 @@ from datetime import datetime
 
 from src.models.order_model import CertificateOrder
 from src.schemas.HeadersSchema import HeadersSchema, CertificateTypes
-from sesc_auth_sdk.enums.departments import Department
+from sesc_auth_sdk.enums.department import Department
 from src.services.user_service import UserService
 
 

@@ -7,9 +7,11 @@ from sesc_auth_sdk.schemas.user import User
 from sesc_auth_sdk.enums import role
 from starlette import status
 import requests
-from schemas.HeadersSchema import HeadersSchema, CertificateTypes
-from schemas.create_shema import CreateShema
-from schemas.department_shema import DepartmentRequest
+
+from src.config import settings
+from src.schemas.HeadersSchema import HeadersSchema, CertificateTypes
+from src.schemas.create_shema import CreateShema
+from src.schemas.department_shema import DepartmentRequest
 
 
 class UserService:
@@ -46,11 +48,11 @@ class UserService:
 
 
     def get_children(self, user: User, headers: HeadersSchema):
-        if role.Role.student in User.roles:
-            return user
+        if role.Role.student in user.roles:
+            return [user]
 
-        elif role.Role.parent in User.roles:
-            res = requests.get("/api/v1/users/me/children").json()
+        elif role.Role.parent in user.roles:
+            res = requests.get(settings.user_service_url + "/api/v1/users/me/children").json()
             try:
                 # 2. Создаем адаптер для списка моделей User
                 user_list_adapter = TypeAdapter(list[User])

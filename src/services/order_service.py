@@ -3,10 +3,10 @@ from uuid import UUID
 from sesc_auth_sdk.schemas.user import User
 from document_renderer_sdk.client import AsyncDocumentRendererClient
 
-from schemas.create_shema import CreateShema
-from services.user_service import UserService
+from src.schemas.create_shema import CreateShema
+from src.services.user_service import UserService
 from src.models.order_model import CertificateOrder
-from sesc_auth_sdk.enums.departments import Department
+from sesc_auth_sdk.enums.department import Department
 from src.schemas.HeadersSchema import HeadersSchema, CertificateTypes
 from src.repository.database_repository import DatabaseRepository, get_base_repository
 from src.schemas.department_shema import DepartmentRequest

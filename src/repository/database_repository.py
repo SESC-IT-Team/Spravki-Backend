@@ -3,7 +3,7 @@ from sesc_auth_sdk.schemas.user import User
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update
 
-from services.user_service import UserService
+from src.services.user_service import UserService
 from src.db.database import get_session, async_session
 from src.models.order_model import CertificateOrder
 from src.schemas.HeadersSchema import CertificateTypes

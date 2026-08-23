@@ -1,5 +1,7 @@
+from http.client import HTTPException
 from uuid import UUID
 
+from fastapi import status
 from sesc_auth_sdk.schemas.user import User
 from document_renderer_sdk.client import AsyncDocumentRendererClient
 
@@ -21,9 +23,8 @@ class OrderService:
         self.data = DataService()
         self.user = UserService()
 
-    async def create_certificate(self, headers: HeadersSchema, data: User, order_data: dict, child_id: CreateShema):
-        self.user.check_role(user=data, headers=headers)
-        order = await self.create_order(headers=headers, data=data, child_id=child_id)
+    async def create_certificate(self, headers: HeadersSchema, data: User, order_data: dict, child: User):
+        order = await self.create_order(headers=headers, data=data, child=child)
         template_data = self.data.get_template_data(headers=headers, data=data, order=order, order_data=order_data)
         template = self.data.get_template_html(headers=headers)
         number = str(self.data.get_certificate_number(order=order))
@@ -45,19 +46,16 @@ class OrderService:
 
 
 
-    async def create_order(self, headers: HeadersSchema, data: User, child_id: CreateShema):
-
+    async def create_order(self, headers: HeadersSchema, data: User, child: User):
         department = Department(self.data.get_department(headers=headers))
-        child = self.user.get_child(child_id=child_id)
         full_name = child.full_name
         certificate_type = headers.certificate_type
         user_id = self.data.get_user_id(user=data)
-        child_id = child_id
+        child_id = child.id
 
         order = CertificateOrder(full_name=full_name, department=department.value,
-                                 certificate_type=certificate_type.value, user_id=user_id, child_id=child_id.child_id)
+                                 certificate_type=certificate_type.value, user_id=user_id, child_id=child_id)
 
-          # создаём сессию здесь
         await self.repository.create_order(
             order=order
         )
@@ -66,22 +64,21 @@ class OrderService:
 
 
     async def get_orders(self, data: FilterRequest, user: User, department: DepartmentRequest) -> list[OrderShema]:
-        self.user.check_department_role(department=department)
         return await self.repository.get_orders(data=data, department=department)
 
 
     async def create_document(self, user: User, order_id: UUID, department: DepartmentRequest):
-        self.user.check_department_role(department=department)
         await self.repository.get_false_orders(department=department, order_id=order_id)
 
 
-    async def get_my_orders(self,department: DepartmentRequest, user: User) -> list[OrderShema]:
-        return await self.repository.get_my_orders(user=user, department=department)
+    async def get_my_orders(self,department: DepartmentRequest, children: list[User]) -> list[OrderShema]:
+        return await self.repository.get_my_orders(children=children, department=department)
 
-
-
-
-
+    async def get_order_by_id(self, order_id: UUID) -> CertificateOrder:
+        order = await self.repository.get_order_by_id(order_id=order_id)
+        if not order:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
+        return order
 
 
 async def get_order_service():

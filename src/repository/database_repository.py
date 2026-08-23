@@ -70,31 +70,18 @@ class DatabaseRepository:
 
 
 
-    async def get_my_orders(self, user: User, department: DepartmentRequest) -> list[OrderShema]:
+    async def get_my_orders(self, children: list[User], department: DepartmentRequest) -> list[OrderShema]:
         c_department = department.department.value
-        user_id = user.id
-        if role.Role.student in user.roles:
-            items = select(CertificateOrder).where(
-                (CertificateOrder.child_id == user_id) &
-                (CertificateOrder.department == c_department)
-            ).order_by(CertificateOrder.created_at.desc())
+        child_ids = [child.id for child in children]
+        items = (
+            select(CertificateOrder)
+            .where((CertificateOrder.child_id.in_(child_ids)))
+            .where(CertificateOrder.department == c_department)
+            .order_by(CertificateOrder.created_at.desc()))
 
-            result = await self.session.execute(items)
-            orders = result.scalars().all()
-            return [OrderShema.model_validate(order) for order in orders]
-
-        elif role.Role.parent in user.roles:
-            children_id: list[UUID] = self.user.get_children_id()
-
-
-            items = select(CertificateOrder).where(
-                (CertificateOrder.child_id in children_id) &
-                (CertificateOrder.department == c_department)
-            ).order_by(CertificateOrder.created_at.desc())
-
-            result = await self.session.execute(items)
-            orders = result.scalars().all()
-            return [OrderShema.model_validate(order) for order in orders]
+        result = await self.session.execute(items)
+        orders = result.scalars().all()
+        return [OrderShema.model_validate(order) for order in orders]
 
 
 
@@ -122,6 +109,13 @@ class DatabaseRepository:
 
         await self.session.execute(stmt)
         await self.session.commit()
+
+    async def get_order_by_id(self, order_id: UUID) -> CertificateOrder | None:
+        result = await self.session.execute(
+            select(CertificateOrder).where(CertificateOrder.id == order_id)
+        )
+        order = result.scalar_one_or_none()
+        return order
 
 
 

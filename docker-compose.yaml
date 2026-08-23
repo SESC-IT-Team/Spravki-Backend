@@ -18,15 +18,12 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=traefik-public
-      - traefik.http.routers.spravki-back.rule=Host(`${DOMAIN}`) && PathPrefix(`/spravki-back`)
+      - traefik.http.routers.spravki-back.rule=Host(`${API_DOMAIN:-api.${DOMAIN}}`)
       - traefik.http.routers.spravki-back.entrypoints=web
-      - traefik.http.routers.spravki-back.middlewares=spravki-back-strip
-      - traefik.http.routers.spravki-back-secure.rule=Host(`${DOMAIN}`) && PathPrefix(`/spravki-back`)
+      - traefik.http.routers.spravki-back-secure.rule=Host(`${API_DOMAIN:-api.${DOMAIN}}`)
       - traefik.http.routers.spravki-back-secure.entrypoints=websecure
       - traefik.http.routers.spravki-back-secure.tls=true
       - traefik.http.routers.spravki-back-secure.tls.certresolver=letsencrypt
-      - traefik.http.routers.spravki-back-secure.middlewares=spravki-back-strip
-      - traefik.http.middlewares.spravki-back-strip.stripprefix.prefixes=/spravki-back
       - traefik.http.services.spravki-back.loadbalancer.server.port=8000
     develop:
       watch:

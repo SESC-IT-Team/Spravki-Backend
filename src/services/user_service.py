@@ -95,7 +95,7 @@ class UserService:
 
 
     def get_child(self, child_id: CreateShema):
-        res = requests.get(f"/api/v1/users/me/children/{child_id.child_id}").json()
+        res = requests.get(settings.user_service_url + f"/api/v1/users/me/children/{child_id.child_id}").json()
         try:
             # 2. Создаем адаптер для списка моделей User
             user_adapter = TypeAdapter(User)
@@ -113,9 +113,14 @@ class UserService:
             print("Данные не соответствуют модели User:")
             print(e.json(indent=2))
 
+    def get_child_or_me(self, child_id: CreateShema, user: User):
+        if user.id == child_id.child_id:
+            return user
+        return self.get_child(child_id=child_id)
+
 
     def get_children_id(self):
-        res = requests.get("/api/v1/users/me/children").json()
+        res = requests.get(settings.user_service_url + "/api/v1/users/me/children").json()
         try:
             # 2. Создаем адаптер для списка моделей User
             user_list_adapter = TypeAdapter(list[User])

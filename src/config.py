@@ -8,6 +8,8 @@ from sesc_auth_sdk.settings import AuthRouterSettings, TokenValidationSettings
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=Path(__file__).parent.parent / ".env", env_file_encoding="utf-8", extra="ignore")
 
+    allowed_origins: list[str]
+
     POSTGRES_HOST: str
     POSTGRES_PORT: int
     POSTGRES_USER: str

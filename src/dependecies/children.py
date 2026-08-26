@@ -24,7 +24,7 @@ async def get_current_user_children_by_cert_type(
         if certificate_type in (CertificateTypes.Standard, CertificateTypes.Tax, CertificateTypes.MilitaryRegistration, CertificateTypes.SocialFoundation):
             return []
         response = await RequestsService.authorized_request(
-            settings.user_service_url + "/api/v1/users/me/children",
+            settings.user_service_url + "/v1/users/me/children",
             token
         )
         users_data = response.get("users", response) if isinstance(response, dict) else response
@@ -59,7 +59,7 @@ async def get_current_user_children_by_dept(
         if department == Department.educational_department:
             return []
         response = await RequestsService.authorized_request(
-            settings.user_service_url + "/api/v1/users/me/children",
+            settings.user_service_url + "/v1/users/me/children",
             token,
         )
         users_data = response.get("users", response) if isinstance(response, dict) else response
@@ -95,7 +95,7 @@ async def check_creation_access(child_id: CreateShema, headers: HeadersSchema, c
                 detail="Parent cannot create orders for this certificate type.",
             )
         response = await RequestsService.authorized_request(
-            settings.user_service_url + f"/api/v1/users/me/children/{child_id.child_id}",
+            settings.user_service_url + f"/v1/users/me/children/{child_id.child_id}",
             token,
         )
         return TypeAdapter(User).validate_python(response)

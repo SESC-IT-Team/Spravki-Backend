@@ -19,7 +19,7 @@ async def check_department_admin(
 ) -> None:
     response = await RequestsService.authorized_request(
         settings.user_service_url
-        + f"/api/v1/departments/{department.value}/members/me",
+        + f"/v1/departments/{department.value}/members/me",
         token,
         raise_for_status={404: HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -43,7 +43,7 @@ async def check_department_admin_via_download_schema(
     department = Department(order.department)
     response = await RequestsService.authorized_request(
         settings.user_service_url
-        + f"/api/v1/departments/{department.value}/members/me",
+        + f"/v1/departments/{department.value}/members/me",
         token,
         raise_for_status={404: HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

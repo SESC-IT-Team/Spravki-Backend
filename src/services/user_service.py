@@ -52,7 +52,7 @@ class UserService:
             return [user]
 
         elif role.Role.parent in user.roles:
-            res = requests.get(settings.user_service_url + "/api/v1/users/me/children").json()
+            res = requests.get(settings.user_service_url + "/v1/users/me/children").json()
             try:
                 # 2. Создаем адаптер для списка моделей User
                 user_list_adapter = TypeAdapter(list[User])
@@ -87,7 +87,7 @@ class UserService:
 
     def check_department_role(self, department: DepartmentRequest):
         department_name = department.department.value
-        res = requests.get(f"/api/v1/departments/{department_name}/members/me", ).json()
+        res = requests.get(f"/v1/departments/{department_name}/members/me", ).json()
         if res.status_code == 200:
             return
         else:
@@ -95,7 +95,7 @@ class UserService:
 
 
     def get_child(self, child_id: CreateShema):
-        res = requests.get(settings.user_service_url + f"/api/v1/users/me/children/{child_id.child_id}").json()
+        res = requests.get(settings.user_service_url + f"/v1/users/me/children/{child_id.child_id}").json()
         try:
             # 2. Создаем адаптер для списка моделей User
             user_adapter = TypeAdapter(User)
@@ -120,7 +120,7 @@ class UserService:
 
 
     def get_children_id(self):
-        res = requests.get(settings.user_service_url + "/api/v1/users/me/children").json()
+        res = requests.get(settings.user_service_url + "/v1/users/me/children").json()
         try:
             # 2. Создаем адаптер для списка моделей User
             user_list_adapter = TypeAdapter(list[User])

@@ -2,7 +2,7 @@ FROM python:3.12-alpine
 
 WORKDIR /app
 
-RUN apk add --no-cache bash git
+RUN apk add --no-cache bash git ca-certificates
 
 RUN pip install --no-cache-dir uv
 

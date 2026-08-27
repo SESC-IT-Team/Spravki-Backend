@@ -67,8 +67,9 @@ class OrderService:
         return await self.repository.get_orders(data=data, department=department)
 
 
-    async def create_document(self, user: User, order_id: UUID, department: DepartmentRequest):
-        await self.repository.get_false_orders(department=department, order_id=order_id)
+    async def create_document(self, user: User, order_id: UUID):
+        order = self.get_order_by_id(order_id)
+        await self.repository.get_false_orders(department=DepartmentRequest(department=Department(order.department)), order_id=order_id)
 
 
     async def get_my_orders(self,department: DepartmentRequest, children: list[User]) -> list[OrderShema]:

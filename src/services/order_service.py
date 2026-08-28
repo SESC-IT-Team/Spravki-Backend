@@ -68,7 +68,7 @@ class OrderService:
 
 
     async def create_document(self, user: User, order_id: UUID):
-        order = self.get_order_by_id(order_id)
+        order = await self.get_order_by_id(order_id)
         await self.repository.get_false_orders(department=DepartmentRequest(department=Department(order.department)), order_id=order_id)
 
 

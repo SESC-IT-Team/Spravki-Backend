@@ -13,7 +13,7 @@ ENV UV_TOOL_BIN_DIR=/usr/local/bin
 
 COPY pyproject.toml ./
 
-RUN uv sync --no-dev
+RUN uv sync --no-dev --upgrade
 
 COPY . .
 

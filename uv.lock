@@ -1138,8 +1138,8 @@ wheels = [
 
 [[package]]
 name = "sesc-auth-sdk"
-version = "2.0.7"
-source = { git = "https://github.com/SESC-IT-Team/Lyceum-Auth-SDK.git#b32e4174aa45f9f75ee1321b443f073154509877" }
+version = "2.0.8"
+source = { git = "https://github.com/SESC-IT-Team/Lyceum-Auth-SDK.git#fa8c871525a372a00088dc670c07dd357cc7a1f7" }
 dependencies = [
     { name = "aiohttp" },
     { name = "fastapi" },

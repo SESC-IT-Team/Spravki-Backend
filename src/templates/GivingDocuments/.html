@@ -4,12 +4,19 @@
     <meta charset="UTF-8">
     <title>Заявление о выдаче документов обучающегося</title>
     <style>
+        @page {
+            size: A4;
+            margin: 20mm;
+        }
         body {
             font-family: 'Times New Roman', Times, serif;
-            margin: 40px;
-            width: 800px;
+            margin: 0;
+            width: auto;
+            max-width: 100%;
             font-size: 14pt;
             line-height: 1.4;
+            overflow-wrap: break-word;
+            box-sizing: border-box;
         }
         .document {
             padding: 0;
@@ -27,13 +34,12 @@
             font-weight: bold;
         }
         .field-label {
-            display: inline-block;
-            min-width: 320px;
+            display: inline;
             vertical-align: top;
         }
         .field-value {
             display: inline-block;
-            width: 420px;
+            max-width: 100%;
             border-bottom: 1px solid #000;
             padding-left: 4px;
         }
